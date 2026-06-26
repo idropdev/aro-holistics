@@ -54,7 +54,7 @@ const JUICES_DATA: Juice[] = [
     name: "Green Vitality",
     tagline: "Cellular Detoxification & Alkalizing Daily Nourishment",
     colorClass: "text-emerald-400 border-emerald-500/20",
-    bgGradient: "from-emerald-950/80 to-teal-950/40",
+    bgGradient: "from-emerald-900 to-teal-950",
     ingredients: ["Organic Celery", "Cucumber", "Spinach", "Green Apple", "Ginger", "Lemon"],
     benefits: ["Promotes digestion & gut health", "Alkalizes blood pH", "Reduces chronic inflammation"],
     stats: [
@@ -69,7 +69,7 @@ const JUICES_DATA: Juice[] = [
     name: "Citrus Immunity",
     tagline: "High-Potency Vitamin C & Antioxidant Powerhouse",
     colorClass: "text-amber-400 border-amber-500/20",
-    bgGradient: "from-amber-950/80 to-orange-950/40",
+    bgGradient: "from-amber-850 to-orange-950",
     ingredients: ["Orange", "Grapefruit", "Turmeric", "Cayenne Pepper", "Lemon", "Astragalus"],
     benefits: ["Triggers immune cell response", "Enhances lymphatic drainage", "Boosts metabolic circulation"],
     stats: [
@@ -84,7 +84,7 @@ const JUICES_DATA: Juice[] = [
     name: "Sweet Root",
     tagline: "Nitric Oxide Booster & Natural Athletic Recovery",
     colorClass: "text-rose-400 border-rose-500/20",
-    bgGradient: "from-rose-950/80 to-purple-950/40",
+    bgGradient: "from-rose-900 to-purple-950",
     ingredients: ["Red Beetroot", "Carrot", "Red Apple", "Ginger", "Key Lime"],
     benefits: ["Increases oxygen delivery to tissues", "Enhances stamina & muscle recovery", "Supports liver detoxification"],
     stats: [
@@ -99,7 +99,7 @@ const JUICES_DATA: Juice[] = [
     name: "Pure Celery Hydrator",
     tagline: "Medical Medium Grade Sodium Cluster Salts",
     colorClass: "text-lime-400 border-lime-500/20",
-    bgGradient: "from-lime-950/80 to-emerald-950/40",
+    bgGradient: "from-lime-900 to-emerald-950",
     ingredients: ["100% Organic Celery (Cold-Pressed)"],
     benefits: ["Restores stomach hydrochloric acid", "Strengthens cellular hydration", "Flushes toxins from liver"],
     stats: [
@@ -401,284 +401,286 @@ export default function App() {
       </section>
 
       {/* ---------------- PRODUCT CATALOG SECTION (JUICES) ---------------- */}
-      <section id="juices" className="relative z-10 py-28 max-w-7xl mx-auto px-6 overflow-hidden">
-        <div className="text-center max-w-2xl mx-auto mb-20 flex flex-col items-center">
+      <section id="juices" className="relative z-10 py-24 max-w-7xl mx-auto px-6 overflow-hidden">
+        <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col items-center">
           <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">Formulated Blends</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight mb-4">
             Our Scientific Formulations
           </h2>
-          <p className="text-charcoal/70">
+          <p className="text-charcoal/70 text-sm">
             Raw, organic ingredients compressed under hydraulic force. Restoring vitality at the cellular level.
           </p>
         </div>
 
-        {/* Character Selection Style Carousel Wrapper */}
-        <div className="relative w-full max-w-4xl mx-auto flex items-center justify-between mb-16 px-4">
+        {/* Side-by-Side grid for Desktop, Stacked for Mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
           
-          {/* Left Arrow Button */}
-          <button 
-            onClick={() => setActiveJuiceIdx((prev) => (prev - 1 + JUICES_DATA.length) % JUICES_DATA.length)}
-            className="absolute left-0 sm:left-4 z-20 p-3 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-            aria-label="Previous Blend"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-
-          {/* Cards 3D Container */}
-          <div 
-            className="relative w-full h-[450px] flex items-center justify-center overflow-visible"
-            style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
-          >
-            {JUICES_DATA.map((juice, index) => {
-              const n = JUICES_DATA.length;
-              const diff = (index - activeJuiceIdx + n) % n;
-              
-              let x = 0;
-              let scale = 0.8;
-              let zIndex = 5;
-              let opacity = 0.4;
-              let rotateY = 0;
-              let filter = "blur(2px) grayscale(30%)";
-              let cursor = "pointer";
-
-              if (diff === 0) { // Active
-                x = 0;
-                scale = 1.05;
-                zIndex = 10;
-                opacity = 1;
-                rotateY = 0;
-                filter = "blur(0px) grayscale(0%)";
-                cursor = "default";
-              } else if (diff === 1) { // Right
-                x = isMobile ? 90 : 250;
-                scale = 0.85;
-                zIndex = 5;
-                opacity = 0.6;
-                rotateY = -18;
-              } else if (diff === n - 1) { // Left
-                x = isMobile ? -90 : -250;
-                scale = 0.85;
-                zIndex = 5;
-                opacity = 0.6;
-                rotateY = 18;
-              } else { // Back
-                x = 0;
-                scale = 0.7;
-                zIndex = 1;
-                opacity = 0;
-                rotateY = 0;
-              }
-
-              return (
-                <motion.div
-                  key={juice.id}
-                  onClick={() => diff !== 0 && setActiveJuiceIdx(index)}
-                  animate={{
-                    x,
-                    scale,
-                    zIndex,
-                    opacity,
-                    rotateY,
-                    filter
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className={`absolute w-[260px] sm:w-[320px] h-[380px] sm:h-[420px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} p-8 border border-white/10 shadow-2xl flex flex-col justify-between select-none ${cursor}`}
-                  style={{ transformOrigin: "center center" }}
+          {/* Left Column: Compact Carousel */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center bg-white/40 backdrop-blur-sm rounded-3xl p-6 border border-forest/5 shadow-sm min-h-[460px]">
+            
+            <div className="relative w-full flex items-center justify-between px-2 mb-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sage">Select Formulation</span>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setActiveJuiceIdx((prev) => (prev - 1 + JUICES_DATA.length) % JUICES_DATA.length)}
+                  className="p-2 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-md cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                  aria-label="Previous Blend"
                 >
-                  {/* Soft blur light source */}
-                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setActiveJuiceIdx((prev) => (prev + 1) % JUICES_DATA.length)}
+                  className="p-2 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-md cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                  aria-label="Next Blend"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-                  {/* Card Content Header */}
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] font-bold tracking-wider uppercase text-white/50 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
-                        {juice.target}
-                      </span>
-                      <span className={`p-2 rounded-full bg-white/5 border ${juice.colorClass}`}>
-                        <Leaf className="w-4 h-4" />
-                      </span>
-                    </div>
+            {/* Cards 3D Container - Compact dimensions */}
+            <div 
+              className="relative w-full h-[370px] flex items-center justify-center overflow-visible"
+              style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+            >
+              {JUICES_DATA.map((juice, index) => {
+                const n = JUICES_DATA.length;
+                const diff = (index - activeJuiceIdx + n) % n;
+                
+                let x = 0;
+                let scale = 0.8;
+                let zIndex = 5;
+                let opacity = 0.4;
+                let rotateY = 0;
+                let filter = "blur(1.5px) grayscale(30%)";
+                let cursor = "pointer";
 
-                    <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-white mt-2 leading-tight">{juice.name}</h3>
-                    <p className="text-xs text-white/70 leading-relaxed mt-4 italic">{juice.tagline}</p>
-                  </div>
+                if (diff === 0) { // Active
+                  x = 0;
+                  scale = 1.0;
+                  zIndex = 10;
+                  opacity = 1;
+                  rotateY = 0;
+                  filter = "blur(0px) grayscale(0%)";
+                  cursor = "default";
+                } else if (diff === 1) { // Right
+                  x = isMobile ? 80 : 130;
+                  scale = 0.82;
+                  zIndex = 5;
+                  opacity = 0.5;
+                  rotateY = -15;
+                } else if (diff === n - 1) { // Left
+                  x = isMobile ? -80 : -130;
+                  scale = 0.82;
+                  zIndex = 5;
+                  opacity = 0.5;
+                  rotateY = 15;
+                } else { // Back
+                  x = 0;
+                  scale = 0.7;
+                  zIndex = 1;
+                  opacity = 0;
+                  rotateY = 0;
+                }
 
-                  {/* Ingredients Tags preview */}
-                  <div>
-                    <div className="flex flex-wrap gap-1.5 mb-6">
-                      {juice.ingredients.slice(0, 3).map((ing, i) => (
-                        <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/75 border border-white/5">
-                          {ing}
+                return (
+                  <motion.div
+                    key={juice.id}
+                    onClick={() => diff !== 0 && setActiveJuiceIdx(index)}
+                    animate={{
+                      x,
+                      scale,
+                      zIndex,
+                      opacity,
+                      rotateY,
+                      filter
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className={`absolute w-[220px] sm:w-[250px] h-[320px] sm:h-[350px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} p-6 border border-white/10 shadow-2xl flex flex-col justify-between select-none ${cursor}`}
+                    style={{ transformOrigin: "center center" }}
+                  >
+                    {/* Soft blur light source */}
+                    <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/5 blur-2xl pointer-events-none" />
+
+                    {/* Card Content Header */}
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[9px] font-bold tracking-wider uppercase text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+                          {juice.target.split(" & ")[0]}
                         </span>
-                      ))}
-                      {juice.ingredients.length > 3 && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/50 border border-white/5">
-                          +{juice.ingredients.length - 3} more
+                        <span className={`p-1.5 rounded-full bg-white/5 border ${juice.colorClass}`}>
+                          <Leaf className="w-3.5 h-3.5" />
                         </span>
-                      )}
+                      </div>
+
+                      <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white mt-1 leading-tight">{juice.name}</h3>
+                      <p className="text-[11px] text-white/70 leading-relaxed mt-3 italic">{juice.tagline}</p>
                     </div>
 
-                    {/* View breakdown trigger */}
-                    <div className="flex justify-between items-center border-t border-white/10 pt-4">
-                      <span className="text-[9px] uppercase tracking-wider text-white/40 font-semibold">Scientific Bio-Mix</span>
-                      {diff === 0 && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedJuice(juice);
-                          }}
-                          className="text-[10px] px-3 py-1 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors"
-                        >
-                          Quick View
-                        </button>
-                      )}
+                    {/* Card Content Footer */}
+                    <div>
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {juice.ingredients.slice(0, 3).map((ing, i) => (
+                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/75 border border-white/5">
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-between items-center border-t border-white/10 pt-3">
+                        <span className="text-[8px] uppercase tracking-wider text-white/40 font-semibold">Active Bio-Mix</span>
+                        {diff === 0 && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedJuice(juice);
+                            }}
+                            className="text-[9px] px-2.5 py-0.5 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors cursor-pointer"
+                          >
+                            Quick View
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Right Arrow Button */}
-          <button 
-            onClick={() => setActiveJuiceIdx((prev) => (prev + 1) % JUICES_DATA.length)}
-            className="absolute right-0 sm:right-4 z-20 p-3 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-            aria-label="Next Blend"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
+          {/* Right Column: Selected Formulation HUD Details Panel */}
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeJuiceIdx}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="relative w-full rounded-3xl bg-forest-dark text-white border border-white/10 shadow-2xl p-6 sm:p-10 overflow-hidden flex flex-col justify-between min-h-[460px]"
+              >
+                {/* Glowing background gradient */}
+                <div className="absolute -top-[10%] -right-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
 
-        {/* Selected Formulation HUD Details Panel */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeJuiceIdx}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="relative max-w-4xl mx-auto rounded-3xl bg-forest-dark text-white border border-white/10 shadow-2xl p-8 sm:p-12 overflow-hidden"
-          >
-            {/* Glowing background gradient */}
-            <div className="absolute -top-[10%] -right-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
-              
-              {/* Left Side: Text Profile */}
-              <div className="lg:col-span-5 flex flex-col gap-5">
-                <div>
-                  <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">
-                    Active System Target: {JUICES_DATA[activeJuiceIdx].target}
-                  </span>
-                  <h3 className="font-serif text-3xl sm:text-4xl font-bold mt-2 text-white">
-                    {JUICES_DATA[activeJuiceIdx].name}
-                  </h3>
-                </div>
-                
-                <p className="text-sm text-white/70 italic leading-relaxed border-l-2 border-emerald-500/30 pl-4">
-                  "{JUICES_DATA[activeJuiceIdx].tagline}"
-                </p>
-
-                <p className="text-xs text-white/60 leading-relaxed">
-                  Tailored utilizing exercise physiology and biochemistry metrics. Optimized for direct assimilation and cellular hydration.
-                </p>
-
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <a 
-                    href="https://orders.food/AroHolistics?type=qr&utm_source=GMB"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-3 rounded-full bg-white hover:bg-cream text-forest-dark font-bold text-xs shadow-md transition-all duration-300 hover:shadow-lg"
-                  >
-                    Order Online
-                  </a>
-                  <button 
-                    onClick={() => setSelectedJuice(JUICES_DATA[activeJuiceIdx])}
-                    className="px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/35 text-white font-bold text-xs transition-all"
-                  >
-                    Clinical Breakdown
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Side: Clinical HUD Stats */}
-              <div className="lg:col-span-7 flex flex-col gap-6 lg:border-l lg:border-white/10 lg:pl-10">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Bio-Enzymatic HUD Metrics</h4>
+                <div className="relative z-10 flex flex-col gap-6 h-full justify-between">
+                  
+                  {/* Top Text Profile */}
                   <div className="flex flex-col gap-4">
-                    {(() => {
-                      const id = JUICES_DATA[activeJuiceIdx].id;
-                      const bars = (() => {
-                        if (id === "green-vitality") {
-                          return [
-                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-emerald-500" },
-                            { label: "Antioxidant Retention (Free Radical Scavenger)", value: 92, color: "bg-emerald-400" },
-                            { label: "Chlorophyll Alkalizing Index", value: 85, color: "bg-teal-500" }
-                          ];
-                        } else if (id === "citrus-immunity") {
-                          return [
-                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-amber-500" },
-                            { label: "Vitamin C Concentration (Lymph Drainage)", value: 100, color: "bg-orange-500" },
-                            { label: "Immune T-Cell Stimulant Index", value: 95, color: "bg-amber-400" }
-                          ];
-                        } else if (id === "sweet-root") {
-                          return [
-                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-rose-500" },
-                            { label: "Nitric Oxide Activation (Stamina)", value: 96, color: "bg-rose-400" },
-                            { label: "Hepatic (Liver) Detox Efficiency", value: 88, color: "bg-purple-500" }
-                          ];
-                        } else {
-                          return [
-                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-lime-500" },
-                            { label: "Stomach Hydrochloric Restoration", value: 98, color: "bg-lime-400" },
-                            { label: "Hydration Bio-Available Salts", value: 94, color: "bg-emerald-500" }
-                          ];
-                        }
-                      })();
-
-                      return bars.map((bar, i) => (
-                        <div key={i} className="flex flex-col">
-                          <div className="flex justify-between text-xs font-semibold mb-1 text-white/80">
-                            <span>{bar.label}</span>
-                            <span>{bar.value}%</span>
-                          </div>
-                          <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${bar.value}%` }}
-                              transition={{ duration: 0.8, delay: 0.1 * i, ease: "easeOut" }}
-                              className={`h-full rounded-full ${bar.color}`}
-                            />
-                          </div>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-
-                <div className="h-[1px] bg-white/10 w-full my-1" />
-
-                {/* Core Ingredients Grid */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Formula Bio-Components</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {JUICES_DATA[activeJuiceIdx].ingredients.map((ing, i) => (
-                      <span 
-                        key={i} 
-                        className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/80 flex items-center gap-1.5 hover:border-emerald-400/50 hover:bg-white/10 transition-colors"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{ing}</span>
+                    <div>
+                      <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">
+                        Active System Target: {JUICES_DATA[activeJuiceIdx].target}
                       </span>
-                    ))}
+                      <h3 className="font-serif text-3xl sm:text-4xl font-bold mt-1 text-white">
+                        {JUICES_DATA[activeJuiceIdx].name}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-xs sm:text-sm text-white/70 italic leading-relaxed border-l-2 border-emerald-500/30 pl-4">
+                      "{JUICES_DATA[activeJuiceIdx].tagline}"
+                    </p>
                   </div>
+
+                  <div className="h-[1px] bg-white/10 w-full" />
+
+                  {/* Dynamic Metrics */}
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Bio-Enzymatic HUD Metrics</h4>
+                    <div className="flex flex-col gap-3">
+                      {(() => {
+                        const id = JUICES_DATA[activeJuiceIdx].id;
+                        const bars = (() => {
+                          if (id === "green-vitality") {
+                            return [
+                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-emerald-500" },
+                              { label: "Antioxidant Retention (Free Radical Scavenger)", value: 92, color: "bg-emerald-400" },
+                              { label: "Chlorophyll Alkalizing Index", value: 85, color: "bg-teal-500" }
+                            ];
+                          } else if (id === "citrus-immunity") {
+                            return [
+                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-amber-500" },
+                              { label: "Vitamin C Concentration (Lymph Drainage)", value: 100, color: "bg-orange-500" },
+                              { label: "Immune T-Cell Stimulant Index", value: 95, color: "bg-amber-400" }
+                            ];
+                          } else if (id === "sweet-root") {
+                            return [
+                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-rose-500" },
+                              { label: "Nitric Oxide Activation (Stamina)", value: 96, color: "bg-rose-400" },
+                              { label: "Hepatic (Liver) Detox Efficiency", value: 88, color: "bg-purple-500" }
+                            ];
+                          } else {
+                            return [
+                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-lime-500" },
+                              { label: "Stomach Hydrochloric Restoration", value: 98, color: "bg-lime-400" },
+                              { label: "Hydration Bio-Available Salts", value: 94, color: "bg-emerald-500" }
+                            ];
+                          }
+                        })();
+
+                        return bars.map((bar, i) => (
+                          <div key={i} className="flex flex-col">
+                            <div className="flex justify-between text-xs font-medium mb-1 text-white/80">
+                              <span>{bar.label}</span>
+                              <span>{bar.value}%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${bar.value}%` }}
+                                transition={{ duration: 0.7, delay: 0.05 * i, ease: "easeOut" }}
+                                className={`h-full rounded-full ${bar.color}`}
+                              />
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="h-[1px] bg-white/10 w-full" />
+
+                  {/* Bio-Components */}
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2.5">Formula Bio-Components</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {JUICES_DATA[activeJuiceIdx].ingredients.map((ing, i) => (
+                        <span 
+                          key={i} 
+                          className="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/80 flex items-center gap-1 hover:border-emerald-400/50 hover:bg-white/10 transition-colors"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span>{ing}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-[1px] bg-white/5 w-full lg:hidden" />
+
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <a 
+                      href="https://orders.food/AroHolistics?type=qr&utm_source=GMB"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 rounded-full bg-white hover:bg-cream text-forest-dark font-bold text-xs shadow-md transition-all duration-300 hover:shadow-lg flex items-center gap-1.5"
+                    >
+                      <span>Order Formulation</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                    <button 
+                      onClick={() => setSelectedJuice(JUICES_DATA[activeJuiceIdx])}
+                      className="px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/35 text-white font-bold text-xs transition-all cursor-pointer"
+                    >
+                      Clinical Breakdown
+                    </button>
+                  </div>
+
                 </div>
-              </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
+        </div>
       </section>
 
       {/* ---------------- REVIEWS & SOCIAL PROOF ---------------- */}
