@@ -17,6 +17,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Import Generated Juice Bottle Images
+import beetFogImg from "./assets/beet_fog.png";
+import bellaVeraImg from "./assets/bella_vera.png";
+import morningDewImg from "./assets/morning_dew.png";
+import toxinPunchImg from "./assets/toxin_punch.png";
+import wakeMeUpImg from "./assets/wake_me_up.png";
+import fitLatinaImg from "./assets/fit_latina.png";
+
 // Types
 interface Juice {
   id: string;
@@ -28,6 +36,7 @@ interface Juice {
   benefits: string[];
   stats: { label: string; value: string }[];
   target: string;
+  image: string;
 }
 
 interface LocationData {
@@ -50,64 +59,100 @@ interface Review {
 // Juices Data
 const JUICES_DATA: Juice[] = [
   {
-    id: "green-vitality",
-    name: "Green Vitality",
-    tagline: "Cellular Detoxification & Alkalizing Daily Nourishment",
-    colorClass: "text-emerald-400 border-emerald-500/20",
-    bgGradient: "from-emerald-900 to-teal-950",
-    ingredients: ["Organic Celery", "Cucumber", "Spinach", "Green Apple", "Ginger", "Lemon"],
-    benefits: ["Promotes digestion & gut health", "Alkalizes blood pH", "Reduces chronic inflammation"],
+    id: "beet-fog",
+    name: "Beet Fog",
+    tagline: "Mental Clarity & Cardiovascular Oxygenation",
+    colorClass: "text-rose-400 border-rose-500/20",
+    bgGradient: "from-rose-950 to-purple-950",
+    ingredients: ["Romaine", "Apple", "Cucumber", "Beets", "Lemon", "Lion's Mane", "Ashwagandha"],
+    benefits: ["Enhances memory & cognitive speed", "Increases nitric oxide blood flow", "Reduces chronic mental fatigue"],
     stats: [
       { label: "Enzymes", value: "100% Active" },
-      { label: "Vitamin C", value: "85% DV" },
-      { label: "Sugar", value: "0g Added" }
+      { label: "Oxygenation", value: "96% Rate" },
+      { label: "Focus", value: "94% Index" }
     ],
-    target: "Digestion & Inflammatory Health"
+    target: "Brain Function & Blood Flow",
+    image: beetFogImg
   },
   {
-    id: "citrus-immunity",
-    name: "Citrus Immunity",
-    tagline: "High-Potency Vitamin C & Antioxidant Powerhouse",
-    colorClass: "text-amber-400 border-amber-500/20",
-    bgGradient: "from-amber-850 to-orange-950",
-    ingredients: ["Orange", "Grapefruit", "Turmeric", "Cayenne Pepper", "Lemon", "Astragalus"],
-    benefits: ["Triggers immune cell response", "Enhances lymphatic drainage", "Boosts metabolic circulation"],
+    id: "bella-vera",
+    name: "Bella Vera",
+    tagline: "Gastric Rejuvenation & Deep Cellular Hydration",
+    colorClass: "text-emerald-400 border-emerald-500/20",
+    bgGradient: "from-teal-900 to-emerald-950",
+    ingredients: ["Aloe Vera", "Honeydew Melon", "Lime", "Coconut", "Fennel"],
+    benefits: ["Soothes digestive gut lining", "Boosts liver detoxification", "Supports premium skin elasticity"],
     stats: [
-      { label: "Vitamin C", value: "220% DV" },
-      { label: "Antioxidants", value: "Premium" },
-      { label: "Sugar", value: "0g Added" }
+      { label: "Enzymes", value: "100% Active" },
+      { label: "Hydration", value: "98% Rate" },
+      { label: "Hepatic", value: "92% Index" }
     ],
-    target: "Immune Defense & Energy"
+    target: "Gut & Skin Rejuvenation",
+    image: bellaVeraImg
   },
   {
-    id: "sweet-root",
-    name: "Sweet Root",
-    tagline: "Nitric Oxide Booster & Natural Athletic Recovery",
-    colorClass: "text-rose-400 border-rose-500/20",
-    bgGradient: "from-rose-900 to-purple-950",
-    ingredients: ["Red Beetroot", "Carrot", "Red Apple", "Ginger", "Key Lime"],
-    benefits: ["Increases oxygen delivery to tissues", "Enhances stamina & muscle recovery", "Supports liver detoxification"],
+    id: "morning-dew",
+    name: "Morning Dew",
+    tagline: "Alkalizing Immune Defense & Bone Strength",
+    colorClass: "text-green-400 border-green-500/20",
+    bgGradient: "from-emerald-950 to-green-900",
+    ingredients: ["Celery", "Spinach", "Green Apple", "Ginger", "Cucumber", "Mint", "Ashwagandha"],
+    benefits: ["Alkalizes blood pH metrics", "Promotes bone cellular density", "Reduces biological stress markers"],
     stats: [
-      { label: "Iron", value: "18% DV" },
-      { label: "Nitrates", value: "High" },
-      { label: "Sugar", value: "0g Added" }
+      { label: "Enzymes", value: "100% Active" },
+      { label: "Immunity", value: "95% Rate" },
+      { label: "Stress", value: "90% Index" }
     ],
-    target: "Cardiovascular & Exercise Science"
+    target: "Immunity & Bone Health",
+    image: morningDewImg
   },
   {
-    id: "pure-celery",
-    name: "Pure Celery Hydrator",
-    tagline: "Medical Medium Grade Sodium Cluster Salts",
+    id: "toxin-punch",
+    name: "Toxin Punch",
+    tagline: "Hepatic Purification & Circulation Acceleration",
     colorClass: "text-lime-400 border-lime-500/20",
     bgGradient: "from-lime-900 to-emerald-950",
-    ingredients: ["100% Organic Celery (Cold-Pressed)"],
-    benefits: ["Restores stomach hydrochloric acid", "Strengthens cellular hydration", "Flushes toxins from liver"],
+    ingredients: ["Green Apple", "Celery", "Fresh Herbs", "Ginger", "Ginseng", "Ashwagandha", "Maca"],
+    benefits: ["Purifies liver toxins", "Accelerates blood circulation", "Fights daily cellular fatigue"],
     stats: [
-      { label: "Hydration", value: "Max" },
-      { label: "Sodium Salts", value: "Natural" },
-      { label: "Sugar", value: "0g Added" }
+      { label: "Enzymes", value: "100% Active" },
+      { label: "Detox", value: "97% Rate" },
+      { label: "Circulation", value: "92% Index" }
     ],
-    target: "Gut Lining & Liver Restore"
+    target: "Liver Detox & Circulation",
+    image: toxinPunchImg
+  },
+  {
+    id: "wake-me-up",
+    name: "Wake Me Up",
+    tagline: "Probiotic Thermogenic Activation & Anti-Inflammatory Energy",
+    colorClass: "text-amber-400 border-amber-500/20",
+    bgGradient: "from-amber-850 to-orange-950",
+    ingredients: ["Lemon", "Pineapple", "Mango", "Ginger", "Green Apple", "Celery", "Cayenne", "Coconut", "Vitamin B12", "Probiotics"],
+    benefits: ["Ignites metabolic rate", "Soothes joint inflammation", "Supplies direct probiotic gut health"],
+    stats: [
+      { label: "Enzymes", value: "100% Active" },
+      { label: "Energy", value: "99% Rate" },
+      { label: "Probiotics", value: "96% Index" }
+    ],
+    target: "Thermogenic Energy & Joints",
+    image: wakeMeUpImg
+  },
+  {
+    id: "fit-latina",
+    name: "Fit Latina Lemonade",
+    tagline: "Electrolyte Replenishment & BCAAs Muscular Recovery",
+    colorClass: "text-pink-400 border-pink-500/20",
+    bgGradient: "from-rose-800 to-pink-950",
+    ingredients: ["Dragon Fruit", "Strawberry", "Pineapple", "Lemon", "Kale", "Spinach", "Rainbow Chard"],
+    benefits: ["Restores active electrolytes", "Assists muscular synthesis with BCAAs", "Boosts metabolic oxygen uptake"],
+    stats: [
+      { label: "Enzymes", value: "100% Active" },
+      { label: "BCAAs", value: "98% Rate" },
+      { label: "Electrolytes", value: "95% Index" }
+    ],
+    target: "Workout Performance & Repair",
+    image: fitLatinaImg
   }
 ];
 
@@ -414,9 +459,8 @@ export default function App() {
 
         {/* Side-by-Side grid for Desktop, Stacked for Mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
-          
-          {/* Left Column: Compact Carousel */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center bg-white/40 backdrop-blur-sm rounded-3xl p-6 border border-forest/5 shadow-sm min-h-[460px]">
+                 {/* Left Column: Compact Carousel */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center min-h-[460px] relative">
             
             <div className="relative w-full flex items-center justify-between px-2 mb-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-sage">Select Formulation</span>
@@ -496,51 +540,64 @@ export default function App() {
                       filter
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className={`absolute w-[220px] sm:w-[250px] h-[320px] sm:h-[350px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} p-6 border border-white/10 shadow-2xl flex flex-col justify-between select-none ${cursor}`}
+                    className={`absolute w-[220px] sm:w-[250px] h-[320px] sm:h-[350px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} border border-white/10 shadow-2xl flex flex-col justify-between overflow-hidden select-none ${cursor}`}
                     style={{ transformOrigin: "center center" }}
                   >
-                    {/* Soft blur light source */}
-                    <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/5 blur-2xl pointer-events-none" />
-
-                    {/* Card Content Header */}
-                    <div>
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-[9px] font-bold tracking-wider uppercase text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
-                          {juice.target.split(" & ")[0]}
-                        </span>
-                        <span className={`p-1.5 rounded-full bg-white/5 border ${juice.colorClass}`}>
-                          <Leaf className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
-
-                      <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white mt-1 leading-tight">{juice.name}</h3>
-                      <p className="text-[11px] text-white/70 leading-relaxed mt-3 italic">{juice.tagline}</p>
+                    {/* Background product bottle image */}
+                    <div className="absolute inset-0 z-0">
+                      <img 
+                        src={juice.image} 
+                        alt={juice.name} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Dark overlay for contrast */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/10" />
                     </div>
 
-                    {/* Card Content Footer */}
-                    <div>
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {juice.ingredients.slice(0, 3).map((ing, i) => (
-                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/75 border border-white/5">
-                            {ing}
+                    {/* Card Content - Overlayed relative content (z-10) */}
+                    <div className="relative z-10 w-full h-full flex flex-col justify-between p-6">
+                      
+                      {/* Card Content Header */}
+                      <div>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-[9px] font-bold tracking-wider uppercase text-white/50 bg-black/40 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm">
+                            {juice.target.split(" & ")[0]}
                           </span>
-                        ))}
+                          <span className={`p-1.5 rounded-full bg-black/40 border ${juice.colorClass} backdrop-blur-sm`}>
+                            <Leaf className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white mt-1 leading-tight drop-shadow-md">{juice.name}</h3>
+                        <p className="text-[11px] text-white/80 leading-relaxed mt-3 italic drop-shadow-sm">{juice.tagline}</p>
                       </div>
 
-                      <div className="flex justify-between items-center border-t border-white/10 pt-3">
-                        <span className="text-[8px] uppercase tracking-wider text-white/40 font-semibold">Active Bio-Mix</span>
-                        {diff === 0 && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedJuice(juice);
-                            }}
-                            className="text-[9px] px-2.5 py-0.5 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors cursor-pointer"
-                          >
-                            Quick View
-                          </button>
-                        )}
+                      {/* Card Content Footer */}
+                      <div>
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {juice.ingredients.slice(0, 3).map((ing, i) => (
+                            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-black/40 text-white/85 border border-white/5 backdrop-blur-xs">
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="flex justify-between items-center border-t border-white/15 pt-3">
+                          <span className="text-[8px] uppercase tracking-wider text-white/40 font-semibold">Active Bio-Mix</span>
+                          {diff === 0 && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedJuice(juice);
+                              }}
+                              className="text-[9px] px-2.5 py-0.5 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors cursor-pointer shadow-sm"
+                            >
+                              Quick View
+                            </button>
+                          )}
+                        </div>
                       </div>
+
                     </div>
                   </motion.div>
                 );
