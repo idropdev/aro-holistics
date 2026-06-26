@@ -183,6 +183,17 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeReviewIdx, setActiveReviewIdx] = useState(0);
   const [selectedJuice, setSelectedJuice] = useState<Juice | null>(null);
+  const [activeJuiceIdx, setActiveJuiceIdx] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Auto scroll reviews
   useEffect(() => {
@@ -390,7 +401,7 @@ export default function App() {
       </section>
 
       {/* ---------------- PRODUCT CATALOG SECTION (JUICES) ---------------- */}
-      <section id="juices" className="relative z-10 py-28 max-w-7xl mx-auto px-6">
+      <section id="juices" className="relative z-10 py-28 max-w-7xl mx-auto px-6 overflow-hidden">
         <div className="text-center max-w-2xl mx-auto mb-20 flex flex-col items-center">
           <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">Formulated Blends</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight mb-4">
@@ -401,83 +412,273 @@ export default function App() {
           </p>
         </div>
 
-        {/* Juices Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-          {JUICES_DATA.map((juice) => (
-            <div 
-              key={juice.id}
-              className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${juice.bgGradient} p-8 sm:p-10 border border-white/5 shadow-2xl flex flex-col justify-between group transition-all duration-300 hover:scale-[1.01]`}
-            >
-              {/* Soft blur light source */}
-              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+        {/* Character Selection Style Carousel Wrapper */}
+        <div className="relative w-full max-w-4xl mx-auto flex items-center justify-between mb-16 px-4">
+          
+          {/* Left Arrow Button */}
+          <button 
+            onClick={() => setActiveJuiceIdx((prev) => (prev - 1 + JUICES_DATA.length) % JUICES_DATA.length)}
+            className="absolute left-0 sm:left-4 z-20 p-3 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            aria-label="Previous Blend"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
-              <div>
-                {/* Header */}
-                <div className="flex justify-between items-start mb-6">
+          {/* Cards 3D Container */}
+          <div 
+            className="relative w-full h-[450px] flex items-center justify-center overflow-visible"
+            style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
+          >
+            {JUICES_DATA.map((juice, index) => {
+              const n = JUICES_DATA.length;
+              const diff = (index - activeJuiceIdx + n) % n;
+              
+              let x = 0;
+              let scale = 0.8;
+              let zIndex = 5;
+              let opacity = 0.4;
+              let rotateY = 0;
+              let filter = "blur(2px) grayscale(30%)";
+              let cursor = "pointer";
+
+              if (diff === 0) { // Active
+                x = 0;
+                scale = 1.05;
+                zIndex = 10;
+                opacity = 1;
+                rotateY = 0;
+                filter = "blur(0px) grayscale(0%)";
+                cursor = "default";
+              } else if (diff === 1) { // Right
+                x = isMobile ? 90 : 250;
+                scale = 0.85;
+                zIndex = 5;
+                opacity = 0.6;
+                rotateY = -18;
+              } else if (diff === n - 1) { // Left
+                x = isMobile ? -90 : -250;
+                scale = 0.85;
+                zIndex = 5;
+                opacity = 0.6;
+                rotateY = 18;
+              } else { // Back
+                x = 0;
+                scale = 0.7;
+                zIndex = 1;
+                opacity = 0;
+                rotateY = 0;
+              }
+
+              return (
+                <motion.div
+                  key={juice.id}
+                  onClick={() => diff !== 0 && setActiveJuiceIdx(index)}
+                  animate={{
+                    x,
+                    scale,
+                    zIndex,
+                    opacity,
+                    rotateY,
+                    filter
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className={`absolute w-[260px] sm:w-[320px] h-[380px] sm:h-[420px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} p-8 border border-white/10 shadow-2xl flex flex-col justify-between select-none ${cursor}`}
+                  style={{ transformOrigin: "center center" }}
+                >
+                  {/* Soft blur light source */}
+                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+
+                  {/* Card Content Header */}
                   <div>
-                    <span className="text-xs font-bold tracking-wider uppercase text-white/50 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                      {juice.target}
-                    </span>
-                    <h3 className="font-serif text-3xl font-semibold text-white mt-3">{juice.name}</h3>
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-[10px] font-bold tracking-wider uppercase text-white/50 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
+                        {juice.target}
+                      </span>
+                      <span className={`p-2 rounded-full bg-white/5 border ${juice.colorClass}`}>
+                        <Leaf className="w-4 h-4" />
+                      </span>
+                    </div>
+
+                    <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-white mt-2 leading-tight">{juice.name}</h3>
+                    <p className="text-xs text-white/70 leading-relaxed mt-4 italic">{juice.tagline}</p>
                   </div>
-                  <span className={`p-2.5 rounded-full bg-white/5 border ${juice.colorClass}`}>
-                    <Leaf className="w-5 h-5" />
-                  </span>
-                </div>
 
-                <p className="text-sm text-white/70 leading-relaxed mb-8 italic">{juice.tagline}</p>
-
-                {/* Ingredients & Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 border-t border-white/10 pt-8">
+                  {/* Ingredients Tags preview */}
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Ingredients</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {juice.ingredients.map((ing, i) => (
-                        <span 
-                          key={i} 
-                          className="text-xs px-2.5 py-1 rounded-md bg-white/5 text-white/80 border border-white/10"
-                        >
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                      {juice.ingredients.slice(0, 3).map((ing, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/75 border border-white/5">
                           {ing}
                         </span>
                       ))}
+                      {juice.ingredients.length > 3 && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/50 border border-white/5">
+                          +{juice.ingredients.length - 3} more
+                        </span>
+                      )}
+                    </div>
+
+                    {/* View breakdown trigger */}
+                    <div className="flex justify-between items-center border-t border-white/10 pt-4">
+                      <span className="text-[9px] uppercase tracking-wider text-white/40 font-semibold">Scientific Bio-Mix</span>
+                      {diff === 0 && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedJuice(juice);
+                          }}
+                          className="text-[10px] px-3 py-1 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors"
+                        >
+                          Quick View
+                        </button>
+                      )}
                     </div>
                   </div>
+                </motion.div>
+              );
+            })}
+          </div>
 
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Nutrition Goals</h4>
-                    <ul className="flex flex-col gap-2">
-                      {juice.benefits.map((benefit, i) => (
-                        <li key={i} className="text-xs text-white/80 flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0" />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom stats row */}
-              <div className="flex flex-wrap justify-between items-center gap-4 pt-6 border-t border-white/5 mt-auto">
-                <div className="flex gap-6">
-                  {juice.stats.map((stat, i) => (
-                    <div key={i} className="flex flex-col">
-                      <span className="text-[10px] uppercase text-white/40 tracking-wider font-semibold">{stat.label}</span>
-                      <span className="text-sm font-semibold text-white mt-0.5">{stat.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button 
-                  onClick={() => setSelectedJuice(juice)}
-                  className="px-5 py-2 rounded-full bg-white text-forest-dark hover:bg-cream text-xs font-bold shadow-md transition-all duration-300"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
+          {/* Right Arrow Button */}
+          <button 
+            onClick={() => setActiveJuiceIdx((prev) => (prev + 1) % JUICES_DATA.length)}
+            className="absolute right-0 sm:right-4 z-20 p-3 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            aria-label="Next Blend"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
+
+        {/* Selected Formulation HUD Details Panel */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeJuiceIdx}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="relative max-w-4xl mx-auto rounded-3xl bg-forest-dark text-white border border-white/10 shadow-2xl p-8 sm:p-12 overflow-hidden"
+          >
+            {/* Glowing background gradient */}
+            <div className="absolute -top-[10%] -right-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+              
+              {/* Left Side: Text Profile */}
+              <div className="lg:col-span-5 flex flex-col gap-5">
+                <div>
+                  <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">
+                    Active System Target: {JUICES_DATA[activeJuiceIdx].target}
+                  </span>
+                  <h3 className="font-serif text-3xl sm:text-4xl font-bold mt-2 text-white">
+                    {JUICES_DATA[activeJuiceIdx].name}
+                  </h3>
+                </div>
+                
+                <p className="text-sm text-white/70 italic leading-relaxed border-l-2 border-emerald-500/30 pl-4">
+                  "{JUICES_DATA[activeJuiceIdx].tagline}"
+                </p>
+
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Tailored utilizing exercise physiology and biochemistry metrics. Optimized for direct assimilation and cellular hydration.
+                </p>
+
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <a 
+                    href="https://orders.food/AroHolistics?type=qr&utm_source=GMB"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-full bg-white hover:bg-cream text-forest-dark font-bold text-xs shadow-md transition-all duration-300 hover:shadow-lg"
+                  >
+                    Order Online
+                  </a>
+                  <button 
+                    onClick={() => setSelectedJuice(JUICES_DATA[activeJuiceIdx])}
+                    className="px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/35 text-white font-bold text-xs transition-all"
+                  >
+                    Clinical Breakdown
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Side: Clinical HUD Stats */}
+              <div className="lg:col-span-7 flex flex-col gap-6 lg:border-l lg:border-white/10 lg:pl-10">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Bio-Enzymatic HUD Metrics</h4>
+                  <div className="flex flex-col gap-4">
+                    {(() => {
+                      const id = JUICES_DATA[activeJuiceIdx].id;
+                      const bars = (() => {
+                        if (id === "green-vitality") {
+                          return [
+                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-emerald-500" },
+                            { label: "Antioxidant Retention (Free Radical Scavenger)", value: 92, color: "bg-emerald-400" },
+                            { label: "Chlorophyll Alkalizing Index", value: 85, color: "bg-teal-500" }
+                          ];
+                        } else if (id === "citrus-immunity") {
+                          return [
+                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-amber-500" },
+                            { label: "Vitamin C Concentration (Lymph Drainage)", value: 100, color: "bg-orange-500" },
+                            { label: "Immune T-Cell Stimulant Index", value: 95, color: "bg-amber-400" }
+                          ];
+                        } else if (id === "sweet-root") {
+                          return [
+                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-rose-500" },
+                            { label: "Nitric Oxide Activation (Stamina)", value: 96, color: "bg-rose-400" },
+                            { label: "Hepatic (Liver) Detox Efficiency", value: 88, color: "bg-purple-500" }
+                          ];
+                        } else {
+                          return [
+                            { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-lime-500" },
+                            { label: "Stomach Hydrochloric Restoration", value: 98, color: "bg-lime-400" },
+                            { label: "Hydration Bio-Available Salts", value: 94, color: "bg-emerald-500" }
+                          ];
+                        }
+                      })();
+
+                      return bars.map((bar, i) => (
+                        <div key={i} className="flex flex-col">
+                          <div className="flex justify-between text-xs font-semibold mb-1 text-white/80">
+                            <span>{bar.label}</span>
+                            <span>{bar.value}%</span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${bar.value}%` }}
+                              transition={{ duration: 0.8, delay: 0.1 * i, ease: "easeOut" }}
+                              className={`h-full rounded-full ${bar.color}`}
+                            />
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-white/10 w-full my-1" />
+
+                {/* Core Ingredients Grid */}
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Formula Bio-Components</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {JUICES_DATA[activeJuiceIdx].ingredients.map((ing, i) => (
+                      <span 
+                        key={i} 
+                        className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/80 flex items-center gap-1.5 hover:border-emerald-400/50 hover:bg-white/10 transition-colors"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>{ing}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
       </section>
 
       {/* ---------------- REVIEWS & SOCIAL PROOF ---------------- */}
