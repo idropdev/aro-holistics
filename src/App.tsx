@@ -195,32 +195,18 @@ const LOCATIONS_DATA: LocationData[] = [
 // Reviews Data
 const REVIEWS_DATA: Review[] = [
   {
-    author: "Samantha K.",
+    author: "Silvana Velasco",
     rating: 5,
-    text: "The Green Vitality juice completely saved my gut health! You can tell it is scientifically structured. Tastes clean, zero preservatives, and gives me natural energy without any crashes.",
-    source: "Google Local Guide",
-    tag: "Aro Holistics Juice Quality"
-  },
-  {
-    author: "Marcus Ramirez",
-    rating: 5,
-    text: "So convenient to grab my daily juices at Hot Joe's Meal Prep or House of Hemp. The nitric oxide beetroot juice (Sweet Root) is my secret weapon before hitting my training sessions.",
+    text: "The best natural most nutritious juices in EP, highly recommend so many good flavors to choose from and the benefits makes you feeling good! 😌",
     source: "Google Review",
-    tag: "Athletic Recovery & Pickup"
+    tag: "Flavor & Nutrition"
   },
   {
-    author: "Elena Castillo",
+    author: "Angelica Garcia",
     rating: 5,
-    text: "I did their botanical health assessment online and bought a tailored pack. It is hands down the highest quality cold-pressed juice in El Paso. Worth every single penny.",
-    source: "Facebook Recommendation",
-    tag: "Personalized Wellness"
-  },
-  {
-    author: "Dr. Adrian Vance",
-    rating: 5,
-    text: "As a clinician, I appreciate that they combine exercise science and clinical nutrition in their formulations. Excellent enzymic retention and no added sugars.",
-    source: "Google Local Guide",
-    tag: "Clinical Standard"
+    text: "Personally, being someone who highly values health and wellness as much as the quality and freshness of ingredients, I can say that Alex is truly dedicated to his craft of producing local high quality cold-pressed juices. He not only knows how to craft the juices with the right ratios to taste just right, but he also creates custom juices & elixirs for specific health goals. His shop is amazing, welcoming and full of life where he features other locally branded products including true high quality seamoss which is hard to find in El Paso. I highly recommend anyone who is on the path to improve/ correct their health to stop by & give something new a chance, you won't be disappointed!",
+    source: "Google Review",
+    tag: "Custom Juices & Seamoss"
   }
 ];
 
