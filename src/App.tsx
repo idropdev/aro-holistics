@@ -207,6 +207,13 @@ const REVIEWS_DATA: Review[] = [
     text: "Personally, being someone who highly values health and wellness as much as the quality and freshness of ingredients, I can say that Alex is truly dedicated to his craft of producing local high quality cold-pressed juices. He not only knows how to craft the juices with the right ratios to taste just right, but he also creates custom juices & elixirs for specific health goals. His shop is amazing, welcoming and full of life where he features other locally branded products including true high quality seamoss which is hard to find in El Paso. I highly recommend anyone who is on the path to improve/ correct their health to stop by & give something new a chance, you won't be disappointed!",
     source: "Google Review",
     tag: "Custom Juices & Seamoss"
+  },
+  {
+    author: "N \"Vee\" Cubillos",
+    rating: 5,
+    text: "These juices are magic in a bottle ! The love poured into each recipe is definitely worth the travel for me, BUT when I can't the option for delivery is AWESOME! Alex goes over & beyond and treats his customers like close friends. Thee kindness, dedication, knowledge, and approachable energy is forever unmatched.",
+    source: "Google Review",
+    tag: "Delivery & Service"
   }
 ];
 
