@@ -1,228 +1,141 @@
-import { useState, useEffect } from "react";
-import { 
-  Leaf, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  ChevronRight, 
-  Star, 
-  X, 
-  Sparkles, 
-  TrendingUp, 
-  Heart, 
-  ExternalLink, 
-  ChevronLeft, 
-  CheckCircle2, 
+import { useState, useEffect, lazy, Suspense } from "react";
+import {
+  Leaf,
+  MapPin,
+  Phone,
+  Mail,
+  ChevronRight,
+  Star,
+  X,
+  Sparkles,
+  TrendingUp,
+  Heart,
+  ExternalLink,
+  ChevronLeft,
+  CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { Ticker, Pillars, WeeklyPress, Shelf, Partners, EventsSection } from "./components/ShopSections";
+import { type ShelfProduct, type Juice, type Review } from "./data/translations";
+import { useLanguage } from "./context/LanguageContext";
+import logoImg from "./assets/logo-128.webp";
 
-// Import Generated Juice Bottle Images
-import beetFogImg from "./assets/beet_fog.png";
-import bellaVeraImg from "./assets/bella_vera.png";
-import morningDewImg from "./assets/morning_dew.png";
-import toxinPunchImg from "./assets/toxin_punch.png";
-import wakeMeUpImg from "./assets/wake_me_up.png";
-import fitLatinaImg from "./assets/fit_latina.png";
-
-// Types
-interface Juice {
-  id: string;
-  name: string;
-  tagline: string;
-  colorClass: string;
-  bgGradient: string;
-  ingredients: string[];
-  benefits: string[];
-  stats: { label: string; value: string }[];
-  target: string;
-  image: string;
-}
+// 3D interactive fruit hero — lazy-loaded so it never blocks first paint
+const FruitHero = lazy(() => import("./components/FruitHero"));
 
 interface LocationData {
   name: string;
   address: string;
-  rating: string;
-  reviewsCount: string;
-  placeId: string;
+  instagram: string;
   mapsUrl: string;
 }
 
-interface Review {
-  author: string;
-  rating: number;
-  text: string;
-  source: string;
-  tag: string;
-}
-
-// Juices Data
-const JUICES_DATA: Juice[] = [
-  {
-    id: "beet-fog",
-    name: "Beet Fog",
-    tagline: "Mental Clarity & Cardiovascular Oxygenation",
-    colorClass: "text-rose-400 border-rose-500/20",
-    bgGradient: "from-rose-950 to-purple-950",
-    ingredients: ["Romaine", "Apple", "Cucumber", "Beets", "Lemon", "Lion's Mane", "Ashwagandha"],
-    benefits: ["Enhances memory & cognitive speed", "Increases nitric oxide blood flow", "Reduces chronic mental fatigue"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "Oxygenation", value: "96% Rate" },
-      { label: "Focus", value: "94% Index" }
-    ],
-    target: "Brain Function & Blood Flow",
-    image: beetFogImg
-  },
-  {
-    id: "bella-vera",
-    name: "Bella Vera",
-    tagline: "Gastric Rejuvenation & Deep Cellular Hydration",
-    colorClass: "text-emerald-400 border-emerald-500/20",
-    bgGradient: "from-teal-900 to-emerald-950",
-    ingredients: ["Aloe Vera", "Honeydew Melon", "Lime", "Coconut", "Fennel"],
-    benefits: ["Soothes digestive gut lining", "Boosts liver detoxification", "Supports premium skin elasticity"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "Hydration", value: "98% Rate" },
-      { label: "Hepatic", value: "92% Index" }
-    ],
-    target: "Gut & Skin Rejuvenation",
-    image: bellaVeraImg
-  },
-  {
-    id: "morning-dew",
-    name: "Morning Dew",
-    tagline: "Alkalizing Immune Defense & Bone Strength",
-    colorClass: "text-green-400 border-green-500/20",
-    bgGradient: "from-emerald-950 to-green-900",
-    ingredients: ["Celery", "Spinach", "Green Apple", "Ginger", "Cucumber", "Mint", "Ashwagandha"],
-    benefits: ["Alkalizes blood pH metrics", "Promotes bone cellular density", "Reduces biological stress markers"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "Immunity", value: "95% Rate" },
-      { label: "Stress", value: "90% Index" }
-    ],
-    target: "Immunity & Bone Health",
-    image: morningDewImg
-  },
-  {
-    id: "toxin-punch",
-    name: "Toxin Punch",
-    tagline: "Hepatic Purification & Circulation Acceleration",
-    colorClass: "text-lime-400 border-lime-500/20",
-    bgGradient: "from-lime-900 to-emerald-950",
-    ingredients: ["Green Apple", "Celery", "Fresh Herbs", "Ginger", "Ginseng", "Ashwagandha", "Maca"],
-    benefits: ["Purifies liver toxins", "Accelerates blood circulation", "Fights daily cellular fatigue"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "Detox", value: "97% Rate" },
-      { label: "Circulation", value: "92% Index" }
-    ],
-    target: "Liver Detox & Circulation",
-    image: toxinPunchImg
-  },
-  {
-    id: "wake-me-up",
-    name: "Wake Me Up",
-    tagline: "Probiotic Thermogenic Activation & Anti-Inflammatory Energy",
-    colorClass: "text-amber-400 border-amber-500/20",
-    bgGradient: "from-amber-850 to-orange-950",
-    ingredients: ["Lemon", "Pineapple", "Mango", "Ginger", "Green Apple", "Celery", "Cayenne", "Coconut", "Vitamin B12", "Probiotics"],
-    benefits: ["Ignites metabolic rate", "Soothes joint inflammation", "Supplies direct probiotic gut health"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "Energy", value: "99% Rate" },
-      { label: "Probiotics", value: "96% Index" }
-    ],
-    target: "Thermogenic Energy & Joints",
-    image: wakeMeUpImg
-  },
-  {
-    id: "fit-latina",
-    name: "Fit Latina Lemonade",
-    tagline: "Electrolyte Replenishment & BCAAs Muscular Recovery",
-    colorClass: "text-pink-400 border-pink-500/20",
-    bgGradient: "from-rose-800 to-pink-950",
-    ingredients: ["Dragon Fruit", "Strawberry", "Pineapple", "Lemon", "Kale", "Spinach", "Rainbow Chard"],
-    benefits: ["Restores active electrolytes", "Assists muscular synthesis with BCAAs", "Boosts metabolic oxygen uptake"],
-    stats: [
-      { label: "Enzymes", value: "100% Active" },
-      { label: "BCAAs", value: "98% Rate" },
-      { label: "Electrolytes", value: "95% Index" }
-    ],
-    target: "Workout Performance & Repair",
-    image: fitLatinaImg
-  }
-];
-
-// Locations Data
+// Pickup locations (from aroholisticsshop.com)
 const LOCATIONS_DATA: LocationData[] = [
   {
-    name: "House of Hemp",
-    address: "12040 Tierra Este Rd Unit 111, El Paso, TX 79938",
-    rating: "4.9",
-    reviewsCount: "138 reviews",
-    placeId: "EjUxMjA0MCBUaWVycmEgRXN0ZSBSZCB1bml0IDExMSwgRWwgUGFzbywgVFggNzk5MzgsIFVTQSIkGiIKFgoUChIJi4kV9p9G54YRnlDxBrNVdfMSCHVuaXQgMTEx",
-    mapsUrl: "https://maps.google.com/?q=12040%20Tierra%20Este%20Rd%20Unit%20111,%20El%20Paso,%20TX%2079938"
+    name: "Main Shop — ARO Holistics",
+    address: "230 N Copia St, El Paso, TX 79905",
+    instagram: "aro_holistics",
+    mapsUrl: "https://maps.google.com/?q=230%20N%20Copia%20St,%20El%20Paso,%20TX%2079905"
   },
   {
-    name: "Homerun Bodywork LLC",
-    address: "2829 Montana Ave, El Paso, TX 79903",
-    rating: "4.8",
-    reviewsCount: "94 reviews",
-    placeId: "ChIJtZY4uZdZ54YRJ2RLfRd35y0",
-    mapsUrl: "https://maps.google.com/?q=2829%20Montana%20Ave,%20El%20Paso,%20TX%2079903"
+    name: "Balanced Peach",
+    address: "1220 Lomaland Dr, El Paso, TX 79907",
+    instagram: "balancedpeach.co",
+    mapsUrl: "https://maps.google.com/?q=1220%20Lomaland%20Dr,%20El%20Paso,%20TX%2079907"
   },
   {
-    name: "Hot Joe's Meal Prep",
-    address: "750 Sunland Park Dr, El Paso, TX 79912",
-    rating: "4.7",
-    reviewsCount: "82 reviews",
-    placeId: "ChIJMa2kiA_43YYR5rAGUlEuDCo",
-    mapsUrl: "https://maps.google.com/?q=750%20Sunland%20Park%20Dr,%20El%20Paso,%20TX%2079912"
+    name: "RC Chiropractor",
+    address: "1601 Wyoming Ave, El Paso, TX 79902",
+    instagram: "rcchiropractic",
+    mapsUrl: "https://maps.google.com/?q=1601%20Wyoming%20Ave,%20El%20Paso,%20TX%2079902"
   },
   {
-    name: "Smoothie King",
-    address: "7456 Cimarron Market Ave E-1, El Paso, TX 79911",
-    rating: "4.6",
-    reviewsCount: "250+ reviews",
-    placeId: "EjQ3NDU2IENpbWFycm9uIE1hcmtldCBBdmUgZSAxLCBFbCBQYXNvLCBUWCA3OTkxMSwgVVNBIjoaOAoxEi8KFAoSCYMUJGjN-N2GEURh8cjfJEvhEKA6KhQKEglNCJJnzfjdhhGJkwNVJoG3DxIDZSAx",
-    mapsUrl: "https://maps.google.com/?q=7456%20Cimarron%20Market%20Ave%20E-1,%20El%20Paso,%20TX%2079911"
-  }
-];
-
-// Reviews Data
-const REVIEWS_DATA: Review[] = [
-  {
-    author: "Silvana Velasco",
-    rating: 5,
-    text: "The best natural most nutritious juices in EP, highly recommend so many good flavors to choose from and the benefits makes you feeling good! 😌",
-    source: "Google Review",
-    tag: "Flavor & Nutrition"
+    name: "Bio Mech Athletics",
+    address: "1601 Wyoming Ave, El Paso, TX 79902",
+    instagram: "biomechathletics",
+    mapsUrl: "https://maps.google.com/?q=1601%20Wyoming%20Ave,%20El%20Paso,%20TX%2079902"
   },
   {
-    author: "Angelica Garcia",
-    rating: 5,
-    text: "Personally, being someone who highly values health and wellness as much as the quality and freshness of ingredients, I can say that Alex is truly dedicated to his craft of producing local high quality cold-pressed juices. He not only knows how to craft the juices with the right ratios to taste just right, but he also creates custom juices & elixirs for specific health goals. His shop is amazing, welcoming and full of life where he features other locally branded products including true high quality seamoss which is hard to find in El Paso. I highly recommend anyone who is on the path to improve/ correct their health to stop by & give something new a chance, you won't be disappointed!",
-    source: "Google Review",
-    tag: "Custom Juices & Seamoss"
-  },
-  {
-    author: "N \"Vee\" Cubillos",
-    rating: 5,
-    text: "These juices are magic in a bottle ! The love poured into each recipe is definitely worth the travel for me, BUT when I can't the option for delivery is AWESOME! Alex goes over & beyond and treats his customers like close friends. Thee kindness, dedication, knowledge, and approachable energy is forever unmatched.",
-    source: "Google Review",
-    tag: "Delivery & Service"
+    name: "Food City",
+    address: "7444 Gateway Blvd East, El Paso, TX 79915",
+    instagram: "foodcityep",
+    mapsUrl: "https://maps.google.com/?q=7444%20Gateway%20Blvd%20East,%20El%20Paso,%20TX%2079915"
   }
 ];
 
 export default function App() {
+  const { language, setLanguage, t, localizedData } = useLanguage();
+  const juicesData = localizedData.juicesData;
+  const reviewsData = localizedData.reviewsData;
+
+  const shelfProducts: ShelfProduct[] = [
+    ...juicesData.map((j) => ({
+      id: j.id,
+      name: j.name,
+      price: "$10.00",
+      unit: language === "en" ? "bottle" : "botella",
+      category: "Juice" as const,
+      description: `${j.tagline}. ${j.benefits[0]}.`,
+      ingredients: j.ingredients,
+      image: j.image
+    })),
+    ...localizedData.wellnessProducts
+  ];
+
   const [modalOpen, setModalOpen] = useState(false);
   const [activeReviewIdx, setActiveReviewIdx] = useState(0);
   const [selectedJuice, setSelectedJuice] = useState<Juice | null>(null);
   const [activeJuiceIdx, setActiveJuiceIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [heroReady, setHeroReady] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Live Google Reviews states
+  const [reviews, setReviews] = useState<Review[]>(reviewsData);
+  const [googleStats, setGoogleStats] = useState<{ rating: number; total: number } | null>(null);
+  const [hasLoadedGoogle, setHasLoadedGoogle] = useState(false);
+
+  // Sync state with dynamic translation datasets if Google reviews are not yet fetched
+  useEffect(() => {
+    if (!hasLoadedGoogle) {
+      setReviews(reviewsData);
+    }
+  }, [reviewsData, hasLoadedGoogle]);
+
+  // Fetch reviews from serverless API route
+  useEffect(() => {
+    fetch("/api/reviews")
+      .then((res) => {
+        if (!res.ok) throw new Error("API response failed");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.reviews && data.reviews.length > 0) {
+          const mapped: Review[] = data.reviews.map((r: any, i: number) => ({
+            id: `google-${i}`,
+            text: r.text,
+            author: r.author_name,
+            source: "Google Review",
+            tag: `${r.rating} ★ · ${r.relative_time_description}`,
+            rating: r.rating,
+            url: r.author_url
+          }));
+          setReviews(mapped);
+          setHasLoadedGoogle(true);
+        }
+        if (data.rating) {
+          setGoogleStats({
+            rating: data.rating,
+            total: data.user_ratings_total || 0
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not retrieve live reviews, falling back to static content:", err);
+      });
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -233,38 +146,53 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Defer the 3D hero until after first paint; skip it entirely for reduced motion
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", onChange);
+    setHeroReady(true);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   // Auto scroll reviews
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveReviewIdx((prev) => (prev + 1) % REVIEWS_DATA.length);
+      setActiveReviewIdx((prev) => (prev + 1) % reviews.length);
     }, 8000);
     return () => clearInterval(timer);
-  }, []);
+  }, [reviews.length]);
 
   const nextReview = () => {
-    setActiveReviewIdx((prev) => (prev + 1) % REVIEWS_DATA.length);
+    setActiveReviewIdx((prev) => (prev + 1) % reviews.length);
   };
 
   const prevReview = () => {
-    setActiveReviewIdx((prev) => (prev - 1 + REVIEWS_DATA.length) % REVIEWS_DATA.length);
+    setActiveReviewIdx((prev) => (prev - 1 + reviews.length) % reviews.length);
+  };
+
+  const getTargetChip = (target: string) => {
+    if (language === "en") {
+      return target.split(" & ")[0];
+    } else {
+      return target.split(" y ")[0] || target;
+    }
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="relative min-h-screen font-sans selection:bg-forest selection:text-white bg-cream text-charcoal">
-      
-      {/* ---------------- BACKGROUND DYNAMIC BLOBS ---------------- */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[-10%] w-[35vw] h-[35vw] rounded-full bg-forest/5 blur-[80px] animate-float-1" />
-        <div className="absolute top-[40%] right-[-15%] w-[40vw] h-[40vw] rounded-full bg-sage/5 blur-[90px] animate-float-2" />
-        <div className="absolute bottom-[10%] left-[20%] w-[30vw] h-[30vw] rounded-full bg-forest-light/5 blur-[70px] animate-float-3" />
-      </div>
+
+      {/* ---------------- ANNOUNCEMENT TICKER ---------------- */}
+      <Ticker />
 
       {/* ---------------- FIXED HEADER ---------------- */}
       <header className="sticky top-0 z-40 w-full glassmorphism transition-all duration-300 border-b border-forest/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group">
-            <span className="p-2.5 rounded-full bg-forest text-white transition-transform group-hover:rotate-12 duration-300">
-              <Leaf className="w-5 h-5" />
+            <span className="transition-transform group-hover:scale-105 duration-300">
+              <img src={logoImg} alt="ARO Holistics Logo" className="w-12 h-12 object-contain" />
             </span>
             <div className="flex flex-col">
               <span className="font-serif text-2xl font-bold tracking-tight text-forest leading-none">ARO</span>
@@ -273,13 +201,39 @@ export default function App() {
           </a>
 
           <nav className="hidden md:flex items-center gap-8 font-medium text-forest-dark">
-            <a href="#about" className="hover:text-sage transition-colors">Science & Vision</a>
-            <a href="#juices" className="hover:text-sage transition-colors">Our Blends</a>
-            <a href="#reviews" className="hover:text-sage transition-colors">Testimonials</a>
-            <a href="#locations" className="hover:text-sage transition-colors">Locations</a>
+            <a href="#shelf" className="hover:text-sage transition-colors">{t("nav.shop")}</a>
+            <a href="#juices" className="hover:text-sage transition-colors">{t("nav.blends")}</a>
+            <a href="#partners" className="hover:text-sage transition-colors">{t("nav.makers")}</a>
+            <a href="#locations" className="hover:text-sage transition-colors">{t("nav.locations")}</a>
+            <a href="#events" className="hover:text-sage transition-colors">{t("nav.events")}</a>
+            <a href="#about" className="hover:text-sage transition-colors">{t("nav.story")}</a>
           </nav>
 
           <div className="flex items-center gap-4">
+            {/* Language Toggle */}
+            <div className="flex items-center rounded-full bg-forest/5 p-1 border border-forest/10 select-none">
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-2.5 py-1 text-[10px] font-bold rounded-full transition-all duration-250 cursor-pointer ${
+                  language === "en"
+                    ? "bg-forest text-white shadow-sm"
+                    : "text-forest-dark/65 hover:text-forest"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLanguage("es")}
+                className={`px-2.5 py-1 text-[10px] font-bold rounded-full transition-all duration-250 cursor-pointer ${
+                  language === "es"
+                    ? "bg-forest text-white shadow-sm"
+                    : "text-forest-dark/65 hover:text-forest"
+                }`}
+              >
+                ES
+              </button>
+            </div>
+
             <a 
               href="sms:+19152558624" 
               className="hidden sm:flex items-center gap-2 text-forest-dark hover:text-sage transition-colors font-medium"
@@ -291,162 +245,255 @@ export default function App() {
               onClick={() => setModalOpen(true)}
               className="px-6 py-2.5 rounded-full bg-forest text-white hover:bg-forest-light transition-all duration-300 shadow-md font-semibold text-sm hover:-translate-y-0.5"
             >
-              Get Free Assessment
+              {t("btn.assessment")}
             </button>
           </div>
         </div>
       </header>
 
-      {/* ---------------- HERO SECTION ---------------- */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-12 md:pt-24 pb-20 md:pb-32 flex flex-col items-center text-center">
-        {/* Animated Pill Badge */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+      {/* ---------------- HERO SECTION: DARK PREMIUM + 3D FRUITS ---------------- */}
+      <section className="relative z-10 overflow-hidden bg-gradient-to-b from-ink via-forest-dark to-ink text-white">
+        {/* Ambient gold + green glows echoing the logo */}
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[70vw] h-[50vh] rounded-full bg-gold/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-30%] left-[10%] w-[40vw] h-[40vh] rounded-full bg-sage-light/10 blur-[100px] pointer-events-none" />
+
+        {/* Interactive 3D floating fruits (cursor pushes them; click slices) */}
+        {heroReady && !reducedMotion && (
+          <Suspense fallback={null}>
+            <FruitHero />
+          </Suspense>
+        )}
+
+        {/* Content sits above the canvas; wrapper lets pointer events fall
+            through to the fruits except on interactive elements */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-20 md:pt-28 pb-24 md:pb-36 flex flex-col items-center text-center pointer-events-none">
+
+
+          {/* Heading */}
+          <motion.h1
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.95] max-w-5xl mb-8 font-semibold"
+          >
+            {language === "en" ? "Real food, slow-pressed, " : "Comida real, prensada lentamente, "}<span className="italic text-gold-light font-medium">{language === "en" ? "by hand." : "a mano."}</span>
+          </motion.h1>
+
+          {/* Value Proposition Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-lg md:text-xl text-white/75 max-w-3xl leading-relaxed mb-12"
+          >
+            {language === "en" ? (
+              <>
+                El Paso's first holistic cold pressed juicery — <span className="font-semibold text-gold-light">nutrient-dense recipes</span>, <span className="font-semibold text-gold-light">holistic locals</span>, and <span className="font-semibold text-gold-light">community wellness</span>.
+              </>
+            ) : (
+              <>
+                La primera juguería holística prensada en frío de El Paso: <span className="font-semibold text-gold-light">recetas densas en nutrientes</span>, <span className="font-semibold text-gold-light">productores locales holísticos</span> y <span className="font-semibold text-gold-light">bienestar comunitario</span>.
+              </>
+            )}
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-5 justify-center w-full sm:w-auto pointer-events-auto"
+          >
+            <a
+              href="#press"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gold text-ink hover:bg-gold-light text-base font-bold shadow-lg shadow-gold/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer group"
+            >
+              <span>{t("hero.cta.press")}</span>
+              <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </a>
+
+            <a
+              href="#partners"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 text-white border border-white/25 hover:border-gold/60 hover:bg-white/10 text-base font-bold backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2"
+            >
+              <span>{t("hero.cta.makers")}</span>
+            </a>
+          </motion.div>
+
+          {/* Playful hint for the 3D fruits */}
+          {!reducedMotion && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 1.4 }}
+              className="mt-12 text-xs tracking-widest uppercase text-white/35"
+            >
+              {t("hero.hint")}
+            </motion.p>
+          )}
+        </div>
+      </section>
+
+      {/* ---------------- BRAND STORY STRIP ---------------- */}
+      <section className="relative z-10 py-20 max-w-4xl mx-auto px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-forest/10 text-forest font-semibold text-xs tracking-wider uppercase mb-8 border border-forest/10"
+          className="flex flex-col items-center gap-5"
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Cold-Pressed. Science-Backed. Tailored to You.</span>
-        </motion.div>
-
-        {/* Heading */}
-        <motion.h1 
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-forest leading-[0.95] max-w-5xl mb-8 font-semibold"
-        >
-          Bottling the Science of <span className="italic text-sage font-medium">Holistic Recovery</span>
-        </motion.h1>
-
-        {/* Value Proposition Description */}
-        <motion.p 
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="text-lg md:text-xl text-charcoal/80 max-w-3xl leading-relaxed mb-12"
-        >
-          ARO Holistics integrates <span className="font-semibold text-forest">Botanical Medicine</span>, <span className="font-semibold text-forest">Clinical Nutrition</span>, and <span className="font-semibold text-forest">Exercise Science</span>. We formulate active raw juices built to support cellular detoxification, metabolic stamina, and optimal healing.
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-5 justify-center w-full sm:w-auto"
-        >
-          <button 
-            onClick={() => setModalOpen(true)}
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-forest text-white hover:bg-forest-light text-base font-bold shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer group"
-          >
-            <span>What Nutrients Does Your Body Crave?</span>
-            <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-          </button>
-          
-          <a 
-            href="https://orders.food/AroHolistics?type=qr&utm_source=GMB" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-forest border border-forest/20 hover:border-forest/50 text-base font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 flex items-center justify-center gap-2"
-          >
-            <span>Order Cold-Pressed Online</span>
-            <ExternalLink className="w-4 h-4" />
+          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight">
+            {language === "en" ? (
+              <>
+                Fresh juice, <span className="italic text-gold-dark font-medium">honest</span> sourcing.
+              </>
+            ) : (
+              <>
+                Jugo fresco, abastecimiento <span className="italic text-gold-dark font-medium">honesto</span>.
+              </>
+            )}
+          </h2>
+          <p className="text-charcoal/75 leading-relaxed max-w-2xl">
+            {t("story.description")}
+          </p>
+          <a href="#about" className="inline-flex items-center gap-2 text-forest font-bold hover:text-sage transition-all hover:translate-x-1 text-sm">
+            <span>{t("story.cta")}</span>
+            <ChevronRight className="w-4 h-4" />
           </a>
         </motion.div>
       </section>
 
+      {/* ---------------- THREE PILLARS ---------------- */}
+      <Pillars />
+
+      {/* ---------------- THIS WEEK'S PRESS ---------------- */}
+      <WeeklyPress products={localizedData.wellnessProducts} />
+
       {/* ---------------- SCIENTIFIC FOUNDATIONS (ABOUT) ---------------- */}
       <section id="about" className="relative z-10 py-24 bg-white border-y border-forest/5">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Left Column: Visual representations of Science */}
-          <div className="relative flex justify-center">
-            {/* Ambient Circle Backdrop */}
-            <div className="absolute inset-0 bg-cream/80 rounded-3xl -rotate-2" />
-            
-            <div className="relative glassmorphism rounded-3xl p-8 sm:p-10 border border-forest/10 shadow-xl max-w-lg w-full flex flex-col gap-6 rotate-1">
-              <h3 className="font-serif text-3xl font-bold text-forest">The Clinical Difference</h3>
-              <p className="text-charcoal/80 leading-relaxed text-sm">
-                Most juices are pasteurized with heat, which kills beneficial enzymes and sensitive antioxidants. 
-                ARO Holistics extracts juices hydraulically under thousands of pounds of pressure—never generating heat.
-              </p>
-              
-              <div className="h-[1px] bg-forest/10 w-full" />
-              
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-forest text-sm">Raw Enzymatic Retention</h4>
-                    <p className="text-xs text-charcoal/60">Enzymes remain alive and bioavailable for instant cellular assimilation.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-rose-50 text-rose-700">
-                    <Heart className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-forest text-sm">Targeted Health Benefits</h4>
-                    <p className="text-xs text-charcoal/60">Tailored combinations targeting digestion, recovery, or immune cellular systems.</p>
-                  </div>
-                </div>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col gap-16">
 
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-forest text-sm">Exercise Science Integration</h4>
-                    <p className="text-xs text-charcoal/60">Optimized nitrate-heavy roots to expand nitric oxide and boost muscular recoverability.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Intro */}
+          <div className="max-w-3xl mx-auto text-center flex flex-col items-center gap-5">
+            <span className="text-xs font-bold tracking-widest text-sage uppercase">{t("about.badge")}</span>
+            <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight">
+              {language === "en" ? (
+                <>
+                  About <span className="italic text-gold-dark font-medium">Aro Holistics</span>.
+                </>
+              ) : (
+                <>
+                  Sobre <span className="italic text-gold-dark font-medium">Aro Holistics</span>.
+                </>
+              )}
+            </h2>
+            <div className="h-1 w-20 bg-gradient-to-r from-sage to-gold rounded-full" />
+            <p className="text-charcoal/80 leading-relaxed text-base">
+              {t("about.desc")}
+            </p>
           </div>
 
-          {/* Right Column: Copywriting */}
-          <div className="flex flex-col gap-6 lg:pl-6">
-            <span className="text-xs font-bold tracking-widest text-sage uppercase">Clinical Standards</span>
-            <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight">
-              A Formulation Tailored Specifically to Your Biology
-            </h2>
-            <div className="h-1 w-20 bg-sage rounded-full" />
-            
-            <p className="text-charcoal/80 leading-relaxed text-base">
-              At ARO Holistics, we don’t believe in one-size-fits-all nutrition. Our formulations combine the healing properties of botanicals with the precision of clinical biochemistry. Whether you are searching for targeted gut lining recovery, cardiovascular enhancement, or complete antioxidant rejuvenation, our cold-pressed juices deliver raw wellness with uncompromising efficacy.
+          {/* Preventative nutrition block */}
+          <div className="max-w-3xl mx-auto text-center flex flex-col items-center gap-4">
+            <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-forest">{t("about.prev.title")}</h3>
+            <p className="text-charcoal/70 leading-relaxed text-sm">
+              {language === "en" ? (
+                <>
+                  Rooted in preventative nutrition and nutritional therapy, our juices are designed to do more than refresh — they're formulated to help protect your body and support the reversal of modern lifestyle diseases. With nearly a decade of clinical nutrition-based juicing experience, we've created <span className="font-semibold text-forest">133+ unique, fully customizable recipes</span>, each one built with a specific health purpose in mind.
+                </>
+              ) : (
+                <>
+                  Basados en la nutrición preventiva y terapia nutricional, nuestros jugos están diseñados para hacer más que refrescar: están formulados para ayudar a proteger tu cuerpo y apoyar la reversión de enfermedades del estilo de vida moderno. Con casi una década de experiencia en jugos basados en nutrición clínica, hemos creado <span className="font-semibold text-forest">más de 133 recetas únicas y totalmente personalizables</span>, cada una diseñada con un propósito de salud específico.
+                </>
+              )}
             </p>
-            
-            <p className="text-charcoal/80 leading-relaxed text-base italic border-l-2 border-sage/50 pl-4 font-serif">
-              "ARO Holistics is a cold pressed juicery that combines Botanical Medicine, Clinical Nutrition, and Exercise Science to create juices tailored to your health."
-            </p>
+          </div>
 
-            <div className="pt-4">
-              <button 
+          {/* Four-column feature grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: <Leaf className="w-5 h-5" />,
+                title: t("about.f1.title"),
+                body: t("about.f1.body")
+              },
+              {
+                icon: <Heart className="w-5 h-5" />,
+                title: t("about.f2.title"),
+                body: t("about.f2.body")
+              },
+              {
+                icon: <Sparkles className="w-5 h-5" />,
+                title: t("about.f3.title"),
+                body: t("about.f3.body")
+              },
+              {
+                icon: <TrendingUp className="w-5 h-5" />,
+                title: t("about.f4.title"),
+                body: t("about.f4.body")
+              }
+            ].map((f) => (
+              <div key={f.title} className="rounded-3xl bg-cream/60 border border-forest/10 p-6 flex flex-col gap-3 hover:border-gold/40 transition-colors">
+                <span className="p-2 rounded-xl bg-forest/5 text-forest w-fit">{f.icon}</span>
+                <h4 className="font-serif text-lg font-semibold text-forest leading-snug">{f.title}</h4>
+                <p className="text-xs text-charcoal/65 leading-relaxed">{f.body}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Visit & Hours */}
+          <div className="max-w-4xl mx-auto w-full rounded-3xl bg-forest-dark text-white p-8 sm:p-10 grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="flex flex-col gap-4">
+              <h3 className="font-serif text-2xl font-bold text-gold-light">{t("about.visit.title")}</h3>
+              <div className="flex items-start gap-3 text-sm text-white/80">
+                <MapPin className="w-5 h-5 text-gold-light shrink-0 mt-0.5" />
+                <span>230 N Copia, El Paso, TX 79905</span>
+              </div>
+              <div className="flex items-start gap-3 text-sm text-white/80">
+                <Phone className="w-5 h-5 text-gold-light shrink-0 mt-0.5" />
+                <a href="tel:+19152558624" className="hover:text-white transition-colors">{t("btn.smsCall")}</a>
+              </div>
+              <p className="text-xs text-white/50">{t("about.visit.note")}</p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-serif text-2xl font-bold text-gold-light">{t("about.hours.title")}</h3>
+              <div className="flex flex-col gap-2 text-sm text-white/80">
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span>{t("about.hours.weekdays")}</span><span className="font-semibold">8am – 6pm</span>
+                </div>
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span>{t("about.hours.weekends")}</span><span className="font-semibold">8am – 3pm</span>
+                </div>
+              </div>
+              <button
                 onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-3 text-forest font-bold hover:text-sage transition-all hover:translate-x-1"
+                className="mt-auto inline-flex items-center gap-2 text-gold-light font-bold hover:text-gold transition-all text-sm w-fit cursor-pointer"
               >
-                <span>Discover your custom nutrient profile</span>
+                <span>{t("about.hours.profile")}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
+
+          {/* Closing statement */}
+          <div className="text-center flex flex-col items-center gap-2">
+            <p className="font-serif text-2xl sm:text-3xl font-semibold text-forest italic">{t("about.closing.title")}</p>
+            <p className="text-sm text-charcoal/60">{t("about.closing.body")}</p>
+          </div>
+
         </div>
       </section>
 
       {/* ---------------- PRODUCT CATALOG SECTION (JUICES) ---------------- */}
       <section id="juices" className="relative z-10 py-24 max-w-7xl mx-auto px-6 overflow-hidden">
         <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col items-center">
-          <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">Formulated Blends</span>
+          <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">{t("juices.badge")}</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight mb-4">
-            Our Scientific Formulations
+            {t("juices.heading")}
           </h2>
           <p className="text-charcoal/70 text-sm">
-            Raw, organic ingredients compressed under hydraulic force. Restoring vitality at the cellular level.
+            {t("juices.subheading")}
           </p>
         </div>
 
@@ -456,19 +503,19 @@ export default function App() {
           <div className="lg:col-span-5 flex flex-col items-center justify-center min-h-[460px] relative">
             
             <div className="relative w-full flex items-center justify-between px-2 mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sage">Select Formulation</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sage">{t("juices.select")}</span>
               <div className="flex gap-2">
                 <button 
-                  onClick={() => setActiveJuiceIdx((prev) => (prev - 1 + JUICES_DATA.length) % JUICES_DATA.length)}
+                  onClick={() => setActiveJuiceIdx((prev) => (prev - 1 + juicesData.length) % juicesData.length)}
                   className="p-2 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-md cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-                  aria-label="Previous Blend"
+                  aria-label={t("juices.prev")}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button 
-                  onClick={() => setActiveJuiceIdx((prev) => (prev + 1) % JUICES_DATA.length)}
+                  onClick={() => setActiveJuiceIdx((prev) => (prev + 1) % juicesData.length)}
                   className="p-2 rounded-full bg-white hover:bg-cream text-forest border border-forest/10 shadow-md cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-                  aria-label="Next Blend"
+                  aria-label={t("juices.next")}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -480,8 +527,10 @@ export default function App() {
               className="relative w-full h-[370px] flex items-center justify-center overflow-visible"
               style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
             >
-              {JUICES_DATA.map((juice, index) => {
-                const n = JUICES_DATA.length;
+              {/* Soft floor shadow beneath the active card */}
+              <div className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-52 h-7 rounded-full bg-ink/25 blur-xl pointer-events-none" />
+              {juicesData.map((juice, index) => {
+                const n = juicesData.length;
                 const diff = (index - activeJuiceIdx + n) % n;
                 
                 let x = 0;
@@ -489,7 +538,7 @@ export default function App() {
                 let zIndex = 5;
                 let opacity = 0.4;
                 let rotateY = 0;
-                let filter = "blur(1.5px) grayscale(30%)";
+                let filter = "blur(2px) saturate(0.75) brightness(0.85)";
                 let cursor = "pointer";
 
                 if (diff === 0) { // Active
@@ -498,19 +547,19 @@ export default function App() {
                   zIndex = 10;
                   opacity = 1;
                   rotateY = 0;
-                  filter = "blur(0px) grayscale(0%)";
+                  filter = "blur(0px) saturate(1) brightness(1)";
                   cursor = "default";
                 } else if (diff === 1) { // Right
                   x = isMobile ? 80 : 130;
                   scale = 0.82;
                   zIndex = 5;
-                  opacity = 0.5;
+                  opacity = 0.45;
                   rotateY = -15;
                 } else if (diff === n - 1) { // Left
                   x = isMobile ? -80 : -130;
                   scale = 0.82;
                   zIndex = 5;
-                  opacity = 0.5;
+                  opacity = 0.45;
                   rotateY = 15;
                 } else { // Back
                   x = 0;
@@ -533,59 +582,63 @@ export default function App() {
                       filter
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className={`absolute w-[220px] sm:w-[250px] h-[320px] sm:h-[350px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} border border-white/10 shadow-2xl flex flex-col justify-between overflow-hidden select-none ${cursor}`}
+                    className={`absolute w-[220px] sm:w-[250px] h-[320px] sm:h-[350px] rounded-3xl bg-gradient-to-br ${juice.bgGradient} flex flex-col justify-between overflow-hidden select-none ${cursor} ${
+                      diff === 0
+                        ? "ring-1 ring-gold/60 shadow-[0_30px_70px_-20px_rgba(201,161,90,0.45)]"
+                        : "border border-white/10 shadow-xl"
+                    }`}
                     style={{ transformOrigin: "center center" }}
                   >
-                    {/* Background product bottle image */}
+                    {/* Real product photo, center-cropped on the bottle */}
                     <div className="absolute inset-0 z-0">
-                      <img 
-                        src={juice.image} 
-                        alt={juice.name} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      <img
+                        src={juice.image}
+                        alt={`${juice.name} bottle`}
+                        className="w-full h-full object-cover"
                       />
-                      {/* Dark overlay for contrast */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/10" />
+                      {/* Legibility gradient anchored to the bottom only — keeps the photo clean */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/35 via-45% to-transparent" />
                     </div>
 
                     {/* Card Content - Overlayed relative content (z-10) */}
-                    <div className="relative z-10 w-full h-full flex flex-col justify-between p-6">
-                      
-                      {/* Card Content Header */}
-                      <div>
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-[9px] font-bold tracking-wider uppercase text-white/50 bg-black/40 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm">
-                            {juice.target.split(" & ")[0]}
-                          </span>
-                          <span className={`p-1.5 rounded-full bg-black/40 border ${juice.colorClass} backdrop-blur-sm`}>
-                            <Leaf className="w-3.5 h-3.5" />
-                          </span>
-                        </div>
+                    <div className="relative z-10 w-full h-full flex flex-col justify-between p-5">
 
-                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white mt-1 leading-tight drop-shadow-md">{juice.name}</h3>
-                        <p className="text-[11px] text-white/80 leading-relaxed mt-3 italic drop-shadow-sm">{juice.tagline}</p>
+                      {/* Top chips */}
+                      <div className="flex justify-between items-start">
+                        <span className="text-[9px] font-bold tracking-wider uppercase text-white/90 bg-ink/55 px-2.5 py-1 rounded-full border border-white/15 backdrop-blur-md">
+                          {getTargetChip(juice.target)}
+                        </span>
+                        <span className={`p-1.5 rounded-full bg-ink/55 border ${juice.colorClass} backdrop-blur-md`}>
+                          <Leaf className="w-3.5 h-3.5" />
+                        </span>
                       </div>
 
-                      {/* Card Content Footer */}
+                      {/* Bottom info panel over the gradient */}
                       <div>
-                        <div className="flex flex-wrap gap-1 mb-4">
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white leading-tight drop-shadow-md">{juice.name}</h3>
+                        <p className="text-[10px] text-white/75 leading-relaxed mt-1.5 italic line-clamp-2">{juice.tagline}</p>
+
+                        <div className="h-px w-10 bg-gold/70 my-3" />
+
+                        <div className="flex flex-wrap gap-1 mb-3">
                           {juice.ingredients.slice(0, 3).map((ing, i) => (
-                            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-black/40 text-white/85 border border-white/5 backdrop-blur-xs">
+                            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/85 border border-white/10 backdrop-blur-xs">
                               {ing}
                             </span>
                           ))}
                         </div>
 
-                        <div className="flex justify-between items-center border-t border-white/15 pt-3">
-                          <span className="text-[8px] uppercase tracking-wider text-white/40 font-semibold">Active Bio-Mix</span>
+                        <div className="flex justify-between items-center border-t border-white/15 pt-2.5">
+                          <span className="text-[8px] uppercase tracking-wider text-white/45 font-semibold">{t("juices.activeBio")}</span>
                           {diff === 0 && (
-                            <button 
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedJuice(juice);
                               }}
-                              className="text-[9px] px-2.5 py-0.5 rounded-full bg-white text-forest-dark font-bold hover:bg-cream transition-colors cursor-pointer shadow-sm"
+                              className="text-[9px] px-2.5 py-1 rounded-full bg-gold text-ink font-bold hover:bg-gold-light transition-colors cursor-pointer shadow-sm"
                             >
-                              Quick View
+                              {t("juices.quickView")}
                             </button>
                           )}
                         </div>
@@ -610,23 +663,23 @@ export default function App() {
                 className="relative w-full rounded-3xl bg-forest-dark text-white border border-white/10 shadow-2xl p-6 sm:p-10 overflow-hidden flex flex-col justify-between min-h-[460px]"
               >
                 {/* Glowing background gradient */}
-                <div className="absolute -top-[10%] -right-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
+                <div className="absolute -top-[10%] -right-[10%] w-[300px] h-[300px] rounded-full bg-gold/10 blur-[80px] pointer-events-none" />
 
                 <div className="relative z-10 flex flex-col gap-6 h-full justify-between">
                   
                   {/* Top Text Profile */}
                   <div className="flex flex-col gap-4">
                     <div>
-                      <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">
-                        Active System Target: {JUICES_DATA[activeJuiceIdx].target}
+                      <span className="text-xs font-bold tracking-widest text-gold-light uppercase">
+                        {t("juices.target")}: {juicesData[activeJuiceIdx].target}
                       </span>
                       <h3 className="font-serif text-3xl sm:text-4xl font-bold mt-1 text-white">
-                        {JUICES_DATA[activeJuiceIdx].name}
+                        {juicesData[activeJuiceIdx].name}
                       </h3>
                     </div>
                     
-                    <p className="text-xs sm:text-sm text-white/70 italic leading-relaxed border-l-2 border-emerald-500/30 pl-4">
-                      "{JUICES_DATA[activeJuiceIdx].tagline}"
+                    <p className="text-xs sm:text-sm text-white/70 italic leading-relaxed border-l-2 border-gold/40 pl-4">
+                      "{juicesData[activeJuiceIdx].tagline}"
                     </p>
                   </div>
 
@@ -634,37 +687,16 @@ export default function App() {
 
                   {/* Dynamic Metrics */}
                   <div className="flex flex-col gap-4">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Bio-Enzymatic HUD Metrics</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40">{t("juices.hud")}</h4>
                     <div className="flex flex-col gap-3">
                       {(() => {
-                        const id = JUICES_DATA[activeJuiceIdx].id;
-                        const bars = (() => {
-                          if (id === "green-vitality") {
-                            return [
-                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-emerald-500" },
-                              { label: "Antioxidant Retention (Free Radical Scavenger)", value: 92, color: "bg-emerald-400" },
-                              { label: "Chlorophyll Alkalizing Index", value: 85, color: "bg-teal-500" }
-                            ];
-                          } else if (id === "citrus-immunity") {
-                            return [
-                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-amber-500" },
-                              { label: "Vitamin C Concentration (Lymph Drainage)", value: 100, color: "bg-orange-500" },
-                              { label: "Immune T-Cell Stimulant Index", value: 95, color: "bg-amber-400" }
-                            ];
-                          } else if (id === "sweet-root") {
-                            return [
-                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-rose-500" },
-                              { label: "Nitric Oxide Activation (Stamina)", value: 96, color: "bg-rose-400" },
-                              { label: "Hepatic (Liver) Detox Efficiency", value: 88, color: "bg-purple-500" }
-                            ];
-                          } else {
-                            return [
-                              { label: "Enzymatic Activity (Cold-Pressed Raw)", value: 100, color: "bg-lime-500" },
-                              { label: "Stomach Hydrochloric Restoration", value: 98, color: "bg-lime-400" },
-                              { label: "Hydration Bio-Available Salts", value: 94, color: "bg-emerald-500" }
-                            ];
-                          }
-                        })();
+                        // Derive bars from each juice's own stats so every blend shows its real profile
+                        const barColors = ["bg-gold", "bg-emerald-400", "bg-sage-light"];
+                        const bars = juicesData[activeJuiceIdx].stats.map((stat, i) => ({
+                          label: `${stat.label} — ${stat.value}`,
+                          value: parseInt(stat.value, 10) || 100,
+                          color: barColors[i % barColors.length]
+                        }));
 
                         return bars.map((bar, i) => (
                           <div key={i} className="flex flex-col">
@@ -690,14 +722,14 @@ export default function App() {
 
                   {/* Bio-Components */}
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2.5">Formula Bio-Components</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2.5">{t("juices.components")}</h4>
                     <div className="flex flex-wrap gap-1.5">
-                      {JUICES_DATA[activeJuiceIdx].ingredients.map((ing, i) => (
+                      {juicesData[activeJuiceIdx].ingredients.map((ing, i) => (
                         <span 
                           key={i} 
-                          className="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/80 flex items-center gap-1 hover:border-emerald-400/50 hover:bg-white/10 transition-colors"
+                          className="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/80 flex items-center gap-1 hover:border-gold/50 hover:bg-white/10 transition-colors"
                         >
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <CheckCircle2 className="w-3 h-3 text-gold-light" />
                           <span>{ing}</span>
                         </span>
                       ))}
@@ -714,14 +746,14 @@ export default function App() {
                       rel="noopener noreferrer"
                       className="px-6 py-3 rounded-full bg-white hover:bg-cream text-forest-dark font-bold text-xs shadow-md transition-all duration-300 hover:shadow-lg flex items-center gap-1.5"
                     >
-                      <span>Order Formulation</span>
+                      <span>{t("juices.order")}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                     <button 
-                      onClick={() => setSelectedJuice(JUICES_DATA[activeJuiceIdx])}
+                      onClick={() => setSelectedJuice(juicesData[activeJuiceIdx])}
                       className="px-6 py-3 rounded-full bg-white/5 border border-white/10 hover:border-white/35 text-white font-bold text-xs transition-all cursor-pointer"
                     >
-                      Clinical Breakdown
+                      {t("juices.clinical")}
                     </button>
                   </div>
 
@@ -733,22 +765,49 @@ export default function App() {
         </div>
       </section>
 
+      {/* ---------------- THE FULL SHELF (CATALOG) ---------------- */}
+      <Shelf products={shelfProducts} />
+
       {/* ---------------- REVIEWS & SOCIAL PROOF ---------------- */}
       <section id="reviews" className="relative z-10 py-24 bg-white border-t border-b border-forest/5">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16 flex flex-col items-center">
-            <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">Real Testimonials</span>
+            <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">{t("reviews.badge")}</span>
             <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight mb-4">
-              What the El Paso Community Says
+              {language === "en" ? (
+                <>
+                  Quiet, <span className="italic text-gold-dark font-medium">steady</span> love.
+                </>
+              ) : (
+                <>
+                  Amor <span className="italic text-gold-dark font-medium">silencioso</span> y constante.
+                </>
+              )}
             </h2>
             <div className="flex gap-1 text-amber-500 mt-2">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-5 h-5 fill-amber-500" />
               ))}
             </div>
-            <p className="text-charcoal/60 text-xs mt-2">
-              Based on verified ratings from our partner pickup spots and local guides
-            </p>
+            <div className="text-charcoal/60 text-xs mt-2 min-h-[1.5rem] flex flex-col sm:flex-row items-center justify-center gap-3">
+              {googleStats ? (
+                <span className="font-semibold text-forest">
+                  {googleStats.rating.toFixed(1)} / 5.0 ({googleStats.total} {language === "en" ? "reviews on Google" : "reseñas en Google"})
+                </span>
+              ) : (
+                <span>{t("reviews.subtext")}</span>
+              )}
+              <span className="hidden sm:inline text-forest/20">|</span>
+              <a
+                href="https://search.google.com/local/writereview?placeid=ChIJpWgLK2lZ54YRh7XQPLRAiK4"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sage hover:text-forest transition-colors font-bold flex items-center gap-1"
+              >
+                <span>{language === "en" ? "Write a review" : "Escribir una reseña"}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           {/* Testimonials Slider */}
@@ -758,56 +817,87 @@ export default function App() {
             </div>
 
             <div className="min-h-[160px] flex flex-col justify-between">
-              <p className="text-lg md:text-xl font-serif italic text-charcoal/80 relative z-10 leading-relaxed mb-8">
-                {REVIEWS_DATA[activeReviewIdx].text}
-              </p>
+              {reviews.length > 0 && reviews[activeReviewIdx] ? (
+                <>
+                  <p className="text-lg md:text-xl font-serif italic text-charcoal/80 relative z-10 leading-relaxed mb-8">
+                    {reviews[activeReviewIdx].text}
+                  </p>
 
-              <div className="flex justify-between items-center">
-                <div>
-                  <h4 className="font-bold text-forest">{REVIEWS_DATA[activeReviewIdx].author}</h4>
-                  <span className="text-xs text-charcoal/50 flex items-center gap-1.5 mt-0.5">
-                    <span>{REVIEWS_DATA[activeReviewIdx].source}</span>
-                    <span className="w-1 h-1 rounded-full bg-charcoal/30" />
-                    <span>{REVIEWS_DATA[activeReviewIdx].tag}</span>
-                  </span>
-                </div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h4 className="font-bold text-forest">{reviews[activeReviewIdx].author}</h4>
+                      <span className="text-xs text-charcoal/50 flex flex-wrap items-center gap-1.5 mt-0.5">
+                        <span>{reviews[activeReviewIdx].source}</span>
+                        <span className="w-1 h-1 rounded-full bg-charcoal/30" />
+                        <span>{reviews[activeReviewIdx].tag}</span>
+                        
+                        <a
+                          href={reviews[activeReviewIdx].url || "https://search.google.com/local/reviews?placeid=ChIJpWgLK2lZ54YRh7XQPLRAiK4"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] font-semibold text-sage hover:text-forest transition-colors inline-flex items-center gap-0.5 ml-1.5"
+                        >
+                          <span>{language === "en" ? "View on Google" : "Ver en Google"}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </span>
+                    </div>
 
-                <div className="flex gap-2">
-                  <button 
-                    onClick={prevReview}
-                    className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={nextReview}
-                    className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
+                    <div className="flex gap-2 shrink-0 self-end sm:self-auto">
+                      <button
+                        onClick={prevReview}
+                        aria-label="Previous review"
+                        className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={nextReview}
+                        aria-label="Next review"
+                        className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center py-10 text-charcoal/40 text-sm">
+                  Loading testimonials...
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ---------------- PARTNER LOCATIONS SECTION ---------------- */}
+      {/* ---------------- MAKERS & PARTNERS ---------------- */}
+      <Partners />
+
+      {/* ---------------- PICKUP LOCATIONS ---------------- */}
       <section id="locations" className="relative z-10 py-28 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-20 flex flex-col items-center">
-          <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">Partner Network</span>
+          <span className="text-xs font-bold tracking-widest text-sage uppercase mb-3">{t("loc.badge")}</span>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-forest leading-tight mb-4">
-            Check Out Our Pickup Locations!
+            {language === "en" ? (
+              <>
+                Find our <span className="italic text-gold-dark font-medium">holistic cold pressed juices</span>.
+              </>
+            ) : (
+              <>
+                Encuentra nuestros <span className="italic text-gold-dark font-medium">jugos holísticos prensados en frío</span>.
+              </>
+            )}
           </h2>
           <p className="text-charcoal/70">
-            Available daily at premium wellness centres, CBD shops, and nutrition outlets in El Paso.
+            {language === "en" ? "Pickup spots around El Paso" : "Puntos de entrega en El Paso"} · <a href="tel:+19152558624" className="font-semibold text-forest hover:text-sage transition-colors">{t("btn.smsCall")}</a>
           </p>
         </div>
 
         {/* Locations Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {LOCATIONS_DATA.map((loc, i) => (
-            <div 
+            <div
               key={i}
               className="glassmorphism rounded-3xl p-6 border border-forest/10 shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:-translate-y-1"
             >
@@ -816,23 +906,31 @@ export default function App() {
                   <div className="p-2 rounded-xl bg-forest/5 text-forest">
                     <MapPin className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200/50 px-2.5 py-0.5 rounded-full text-xs font-bold">
-                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                    <span>{loc.rating}</span>
-                  </div>
                 </div>
 
-                <h3 className="font-serif text-xl font-bold text-forest mb-2">{loc.name}</h3>
-                <p className="text-xs text-charcoal/60 leading-relaxed mb-6">{loc.address}</p>
+                <h3 className="font-serif text-xl font-bold text-forest mb-2">
+                  {loc.name === "Main Shop — ARO Holistics" 
+                    ? (language === "en" ? "Main Shop — ARO Holistics" : "Tienda Principal — ARO Holistics")
+                    : loc.name}
+                </h3>
+                <p className="text-xs text-charcoal/65 leading-relaxed mb-3">{loc.address}</p>
+                <a
+                  href={`https://www.instagram.com/${loc.instagram}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-sage font-semibold hover:text-forest transition-colors inline-block mb-6"
+                >
+                  @{loc.instagram}
+                </a>
               </div>
 
-              <a 
+              <a
                 href={loc.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 rounded-xl bg-white border border-forest/15 hover:border-forest/40 hover:bg-cream text-xs text-forest font-bold tracking-wider uppercase text-center flex items-center justify-center gap-2 transition-all duration-300"
               >
-                <span>Navigate on Maps</span>
+                <span>{t("loc.navigate")}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -840,24 +938,27 @@ export default function App() {
         </div>
       </section>
 
+      {/* ---------------- EVENTS ---------------- */}
+      <EventsSection />
+
       {/* ---------------- INTERACTIVE FOOTER ---------------- */}
       <footer className="relative z-10 bg-forest-dark text-white pt-20 pb-10 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-white/10">
           
           {/* Brand Info */}
           <div className="md:col-span-5 flex flex-col gap-6">
-            <a href="#" className="flex items-center gap-3">
-              <span className="p-2 bg-white text-forest-dark rounded-full">
-                <Leaf className="w-5 h-5" />
+            <a href="#" className="flex items-center gap-3 group">
+              <span className="transition-transform group-hover:scale-105 duration-300">
+                <img src={logoImg} alt="ARO Holistics Logo" className="w-12 h-12 object-contain" />
               </span>
               <div className="flex flex-col">
                 <span className="font-serif text-2xl font-bold tracking-tight text-white leading-none">ARO</span>
-                <span className="text-[10px] tracking-[0.25em] font-medium uppercase text-emerald-400">Holistics</span>
+                <span className="text-[10px] tracking-[0.25em] font-medium uppercase text-gold-light">Holistics</span>
               </div>
             </a>
             
             <p className="text-sm text-white/70 max-w-sm leading-relaxed">
-              ARO Holistics integrates Botanical Medicine, Clinical Nutrition, and Exercise Science to build cold-pressed juices suited directly to your personal health.
+              {t("footer.desc")}
             </p>
 
             <div className="flex items-center gap-3">
@@ -885,31 +986,40 @@ export default function App() {
           </div>
 
           {/* Quick Links */}
-          <div className="md:col-span-3">
-            <h4 className="font-serif text-lg font-bold text-emerald-400 mb-6">Explore</h4>
-            <ul className="flex flex-col gap-4 text-sm text-white/70">
-              <li><a href="#about" className="hover:text-white transition-colors">The Clinical Science</a></li>
-              <li><a href="#juices" className="hover:text-white transition-colors">Our Cold Pressed Blends</a></li>
-              <li><a href="#locations" className="hover:text-white transition-colors">Partner Distributors</a></li>
-              <li><a href="https://orders.food/AroHolistics?type=qr&utm_source=GMB" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Store Ordering System</a></li>
-            </ul>
+          <div className="md:col-span-3 grid grid-cols-2 gap-8">
+            <div>
+              <h4 className="font-serif text-lg font-bold text-gold-light mb-6">{t("footer.visit.title")}</h4>
+              <ul className="flex flex-col gap-4 text-sm text-white/70">
+                <li><a href="#locations" className="hover:text-white transition-colors">{t("footer.visit.locations")}</a></li>
+                <li><a href="#events" className="hover:text-white transition-colors">{t("footer.visit.events")}</a></li>
+                <li><a href="#partners" className="hover:text-white transition-colors">{t("footer.visit.partners")}</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-serif text-lg font-bold text-gold-light mb-6">{t("footer.about.title")}</h4>
+              <ul className="flex flex-col gap-4 text-sm text-white/70">
+                <li><a href="#about" className="hover:text-white transition-colors">{t("footer.about.story")}</a></li>
+                <li><a href="#shelf" className="hover:text-white transition-colors">{t("footer.about.shelf")}</a></li>
+                <li><a href="https://orders.food/AroHolistics?type=qr&utm_source=GMB" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t("footer.about.order")}</a></li>
+              </ul>
+            </div>
           </div>
 
           {/* Contact Details */}
           <div className="md:col-span-4 flex flex-col gap-6">
-            <h4 className="font-serif text-lg font-bold text-emerald-400">Headquarters & Inquiries</h4>
+            <h4 className="font-serif text-lg font-bold text-gold-light">{t("footer.hq.title")}</h4>
             
             <div className="flex flex-col gap-4 text-sm text-white/70">
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-gold-light shrink-0 mt-0.5" />
                 <span>230 N Copia Street, El Paso, TX 79905</span>
               </div>
               <div className="flex items-start gap-3">
-                <Phone className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <span>SMS or Call: (915) 255-8624</span>
+                <Phone className="w-5 h-5 text-gold-light shrink-0 mt-0.5" />
+                <span>{t("btn.smsCall")}</span>
               </div>
               <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <Mail className="w-5 h-5 text-gold-light shrink-0 mt-0.5" />
                 <span>info@aroholistics.com</span>
               </div>
             </div>
@@ -919,10 +1029,10 @@ export default function App() {
 
         {/* Sub-footer */}
         <div className="max-w-7xl mx-auto px-6 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-white/50">
-          <p>© {new Date().getFullYear()} ARO Holistics. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {t("footer.sub.note")}</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-white transition-colors">{t("footer.privacy")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("footer.terms")}</a>
           </div>
         </div>
       </footer>
@@ -955,13 +1065,14 @@ export default function App() {
                     <Sparkles className="w-4 h-4" />
                   </span>
                   <div>
-                    <h3 className="font-serif text-lg font-bold text-forest">Nutrient Assessment</h3>
-                    <p className="text-[10px] text-charcoal/50">Find exactly what formulation matches your body's recovery goals</p>
+                    <h3 className="font-serif text-lg font-bold text-forest">{t("modal.assessment.title")}</h3>
+                    <p className="text-[10px] text-charcoal/50">{t("modal.assessment.subtitle")}</p>
                   </div>
                 </div>
                 
                 <button 
                   onClick={() => setModalOpen(false)}
+                  aria-label="Close assessment"
                   className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
@@ -1004,18 +1115,26 @@ export default function App() {
               transition={{ type: "spring", duration: 0.5 }}
               className="relative w-full max-w-2xl bg-white rounded-3xl border border-forest/10 shadow-2xl flex flex-col overflow-hidden z-10"
             >
-              {/* Top Banner Accent */}
-              <div className={`h-3 bg-gradient-to-r ${selectedJuice.bgGradient}`} />
+              {/* Product photo banner */}
+              <div className="relative h-44 overflow-hidden shrink-0">
+                <img
+                  src={selectedJuice.image}
+                  alt={`${selectedJuice.name} bottle`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+              </div>
 
-              <div className="p-8">
+              <div className="p-8 pt-5">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-sage">Formulation Profile</span>
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-sage">{t("bottle.profile")}</span>
                     <h3 className="font-serif text-3xl font-bold text-forest mt-1">{selectedJuice.name}</h3>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setSelectedJuice(null)}
+                    aria-label="Close formulation details"
                     className="p-2 rounded-full hover:bg-forest/5 text-forest transition-colors border border-forest/10 cursor-pointer"
                   >
                     <X className="w-4 h-4" />
@@ -1031,7 +1150,7 @@ export default function App() {
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-forest/70 mb-3 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-sage" />
-                      <span>Full Ingredients</span>
+                      <span>{t("bottle.ingredients")}</span>
                     </h4>
                     <ul className="flex flex-col gap-2">
                       {selectedJuice.ingredients.map((ing, i) => (
@@ -1046,7 +1165,7 @@ export default function App() {
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-forest/70 mb-3 flex items-center gap-1.5">
                       <AlertCircle className="w-3.5 h-3.5 text-sage" />
-                      <span>Clinical Health Targets</span>
+                      <span>{t("bottle.targets")}</span>
                     </h4>
                     <ul className="flex flex-col gap-2">
                       {selectedJuice.benefits.map((benefit, i) => (
@@ -1076,7 +1195,7 @@ export default function App() {
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto px-6 py-3 rounded-full bg-forest text-white hover:bg-forest-light text-sm font-bold shadow-md transition-all duration-300 hover:shadow-lg text-center"
                   >
-                    Order from Distributor
+                    {t("bottle.order")}
                   </a>
                 </div>
               </div>
@@ -1086,5 +1205,6 @@ export default function App() {
       </AnimatePresence>
 
     </div>
+    </MotionConfig>
   );
 }
